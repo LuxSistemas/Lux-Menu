@@ -3,7 +3,7 @@
     "id": 14,
     "titulo": "Adicionar fotos na O.S",
     "url": "https://www.youtube.com/watch?v=TqDAuiAGhRo",
-    "tags": "ordem de serviço, OS, fotos",
+    "tags": "ordem de serviço, OS, fotos, imagem, câmera, anexo, foto, galeria, serviço",
     "descricao": null,
     "categoria_nome": "Ordens de Serviço"
   },
@@ -11,7 +11,7 @@
     "id": 37,
     "titulo": "Cadastro de Produtos",
     "url": "https://www.youtube.com/watch?v=jjqlTR1QVE0",
-    "tags": "Produtos, Produto, Cadastro",
+    "tags": "produto, produtos, cadastro, estoque, mercadoria, item, código de barras, SKU",
     "descricao": null,
     "categoria_nome": "Cadastros"
   },
@@ -19,7 +19,7 @@
     "id": 35,
     "titulo": "Cadastro de carro",
     "url": "https://drive.google.com/file/d/1NQOhDpp-kuOKU4ybSLexPzTTXpVZy6s0/view?usp=sharing",
-    "tags": "cadastro de carro, veículo",
+    "tags": "cadastro de carro, veículo, automóvel, placa, auto, modelo, marca, veicular",
     "descricao": null,
     "categoria_nome": "Cadastros"
   },
@@ -27,7 +27,7 @@
     "id": 4,
     "titulo": "Cadastro de clientes e fornecedores",
     "url": "https://www.youtube.com/watch?v=D_4zbfkYelw",
-    "tags": "cadastro cliente, cadastro fornecedor, cliente, fornecedor",
+    "tags": "cadastro, cliente, fornecedor, CNPJ, CPF, pessoa física, pessoa jurídica, contato, novo cliente",
     "descricao": null,
     "categoria_nome": "Cadastros"
   },
@@ -35,7 +35,7 @@
     "id": 22,
     "titulo": "Caixas e bancos",
     "url": "https://www.youtube.com/watch?v=JTwQNCCsB-E",
-    "tags": "caixa, banco",
+    "tags": "caixa, banco, saldo, conta bancária, financeiro, movimento, extrato, abertura de caixa",
     "descricao": null,
     "categoria_nome": "Financeiro"
   },
@@ -43,7 +43,7 @@
     "id": 16,
     "titulo": "Como agendar um orçamento",
     "url": "https://www.youtube.com/watch?v=8bk5QVslFyA",
-    "tags": "orçamento, agendar orçamento, agendamento",
+    "tags": "orçamento, agendar orçamento, agendamento, agenda, marcar, cliente, visita, data, horário",
     "descricao": null,
     "categoria_nome": "Orçamentos"
   },
@@ -51,7 +51,7 @@
     "id": 15,
     "titulo": "Como criar um orçamento",
     "url": "https://www.youtube.com/watch?v=-J_3LAlFYuk",
-    "tags": "orçamento, criar orçamento",
+    "tags": "orçamento, criar orçamento, novo orçamento, proposta, cotação, produto, cliente",
     "descricao": null,
     "categoria_nome": "Orçamentos"
   },
@@ -59,7 +59,7 @@
     "id": 36,
     "titulo": "Como inutilizar uma nota",
     "url": "https://drive.google.com/file/d/13Zhj8ro2Zkx41irPrzU2OuNFayCxW4Du/view?usp=sharing",
-    "tags": "inutilizar nota, NFe, cancelamento",
+    "tags": "inutilizar nota, NFe, cancelamento, inutilização, número, sequência, faixa, nota fiscal",
     "descricao": null,
     "categoria_nome": "Fiscal"
   },
@@ -67,7 +67,7 @@
     "id": 3,
     "titulo": "Como pagar suas faturas?",
     "url": "https://www.youtube.com/watch?v=iO9ohIOCq6I&t=2s",
-    "tags": "pagar fatura, fatura, pagamento",
+    "tags": "pagar fatura, fatura, pagamento, boleto, mensalidade, vencimento, financeiro, sistema",
     "descricao": null,
     "categoria_nome": "Financeiro"
   },
@@ -75,15 +75,15 @@
     "id": 2,
     "titulo": "Conciliação Bancária",
     "url": "https://drive.google.com/file/d/1nvZqW9wkdEtU_qrVO7GqQ4dMNp_D8Xxj/view?usp=sharing",
-    "tags": "Conciliação, Banco. Bancária, Financeiro, Caixa e Banco, Caixas e Bancos",
+    "tags": "conciliação, banco, bancária, financeiro, caixa, extrato, conferência, saldo, lançamento, conferir",
     "descricao": "Tutorial explicando sobre a conciliação bancária no caixa e banco.",
-    "categoria_nome": null
+    "categoria_nome": "Financeiro"
   },
   {
     "id": 31,
     "titulo": "Consulta NFe no Portal Nacional",
     "url": "https://drive.google.com/file/d/1EOWEuamDxudh-zZzFMqHzL7WJB4oDeME/view?usp=sharing",
-    "tags": "consulta NFe, portal nacional",
+    "tags": "consulta NFe, portal nacional, SEFAZ, consultar nota, chave de acesso, DANFE, status nota",
     "descricao": null,
     "categoria_nome": "Fiscal"
   },
@@ -91,7 +91,7 @@
     "id": 21,
     "titulo": "Contas a pagar",
     "url": "https://www.youtube.com/watch?v=Cg9n4NCaad4",
-    "tags": "contas a pagar, fatura",
+    "tags": "contas a pagar, fatura, despesa, vencimento, fornecedor, lançamento, boleto, pagar",
     "descricao": null,
     "categoria_nome": "Financeiro"
   },
@@ -99,7 +99,7 @@
     "id": 23,
     "titulo": "Contas a receber",
     "url": "https://www.youtube.com/watch?v=IExf8nR08XQ&t=1s",
-    "tags": "contas a receber",
+    "tags": "contas a receber, recebimento, cliente, cobrança, crédito, vencimento, parcela, receber",
     "descricao": null,
     "categoria_nome": "Financeiro"
   },
@@ -107,7 +107,7 @@
     "id": 11,
     "titulo": "Criação de ordem de serviço do zero",
     "url": "https://www.youtube.com/watch?v=KFbubhp3gYE",
-    "tags": "ordem de serviço, OS, criar OS",
+    "tags": "ordem de serviço, OS, criar OS, novo serviço, abertura, manutenção, reparo, técnico, oficina",
     "descricao": null,
     "categoria_nome": "Ordens de Serviço"
   },
@@ -115,7 +115,7 @@
     "id": 27,
     "titulo": "Devolução de NFe",
     "url": "https://www.youtube.com/watch?v=y1vFr-D-MTU",
-    "tags": "devolução, NFe, nota fiscal",
+    "tags": "devolução, NFe, nota fiscal, retorno, mercadoria, estorno, nota de retorno, devolver",
     "descricao": null,
     "categoria_nome": "Fiscal"
   },
@@ -123,7 +123,7 @@
     "id": 10,
     "titulo": "Devolução de compra",
     "url": "https://www.youtube.com/watch?v=FF-1rf2Y9zk",
-    "tags": "devolução de compra, nota de devolução, fornecedor",
+    "tags": "devolução de compra, nota de devolução, fornecedor, retorno, estorno de compra, entrada, devolver",
     "descricao": null,
     "categoria_nome": "Fiscal"
   },
@@ -131,7 +131,7 @@
     "id": 5,
     "titulo": "Dúvidas comuns no cadastro de clientes",
     "url": "https://www.youtube.com/watch?v=PQfeMG9Y3p0",
-    "tags": "cadastro cliente, dúvidas, cliente",
+    "tags": "cadastro, cliente, dúvidas, CNPJ, CPF, endereço, contato, erro, problema, frequentes",
     "descricao": null,
     "categoria_nome": "Cadastros"
   },
@@ -139,7 +139,7 @@
     "id": 26,
     "titulo": "Emissão de NFSe",
     "url": "https://www.youtube.com/watch?v=bodfByNxVpU",
-    "tags": "NFSe, nota fiscal de serviço, emissão",
+    "tags": "NFSe, nota fiscal de serviço, emissão, serviço, prefeitura, ISS, NFS-e, emitir, nota de serviço",
     "descricao": null,
     "categoria_nome": "Fiscal"
   },
@@ -147,7 +147,7 @@
     "id": 29,
     "titulo": "Emitindo NFC-e pelo PDV",
     "url": "https://www.youtube.com/watch?v=72x5f8YLOh8",
-    "tags": "NFCe, PDV, emissão, cupom fiscal",
+    "tags": "NFCe, PDV, emissão, cupom fiscal, frente de caixa, venda, consumidor, NFC-e, balcão, caixa",
     "descricao": null,
     "categoria_nome": "Fiscal"
   },
@@ -155,7 +155,7 @@
     "id": 18,
     "titulo": "Ensinando pedidos",
     "url": "https://www.youtube.com/watch?v=Spdgph05WuY",
-    "tags": "pedido, pedidos, venda",
+    "tags": "pedido, pedidos, venda, ordem de venda, cliente, produto, faturar, lançar pedido",
     "descricao": null,
     "categoria_nome": "Venda/PDV"
   },
@@ -163,7 +163,7 @@
     "id": 28,
     "titulo": "Envio de documentos fiscais para contabilidade",
     "url": "https://www.youtube.com/watch?v=QUUXGFMsYgw",
-    "tags": "contabilidade, envio de documentos",
+    "tags": "contabilidade, envio de documentos, XML, SPED, contador, nota fiscal, remessa, documentos fiscais",
     "descricao": null,
     "categoria_nome": "Fiscal"
   },
@@ -171,7 +171,7 @@
     "id": 6,
     "titulo": "Erro de I.E",
     "url": "https://www.youtube.com/watch?v=RO6DYbwKq3M",
-    "tags": "inscrição estadual, IE, erro cadastro, cliente, fornecedor",
+    "tags": "inscrição estadual, IE, erro cadastro, cliente, fornecedor, ICMS, rejeição, contribuinte, inscrição",
     "descricao": null,
     "categoria_nome": "Cadastros"
   },
@@ -179,7 +179,7 @@
     "id": 33,
     "titulo": "Estorno de contas a pagar",
     "url": "https://drive.google.com/file/d/1mRSd5dL2gIg081S-Nr2XCembq6OQdvmw/view?usp=sharing",
-    "tags": "estorno, contas a pagar",
+    "tags": "estorno, contas a pagar, cancelar pagamento, reverter, desfazer, lançamento, financeiro",
     "descricao": null,
     "categoria_nome": "Financeiro"
   },
@@ -187,7 +187,7 @@
     "id": 12,
     "titulo": "Etapas da O.S",
     "url": "https://www.youtube.com/watch?v=CFd8g44Q7t4",
-    "tags": "ordem de serviço, OS, etapas",
+    "tags": "ordem de serviço, OS, etapas, status, andamento, progresso, técnico, fase, kanban, movimentar",
     "descricao": null,
     "categoria_nome": "Ordens de Serviço"
   },
@@ -195,7 +195,7 @@
     "id": 20,
     "titulo": "Formas de pagamento",
     "url": "https://www.youtube.com/watch?v=V_UdVo5jp3s",
-    "tags": "forma de pagamento, pagamento",
+    "tags": "forma de pagamento, pagamento, dinheiro, cartão, PIX, boleto, crédito, débito, cheque, parcelamento",
     "descricao": null,
     "categoria_nome": "Financeiro"
   },
@@ -203,7 +203,7 @@
     "id": 13,
     "titulo": "Gerar O.S através de orçamento",
     "url": "https://www.youtube.com/watch?v=Qp912zktTvE",
-    "tags": "ordem de serviço, OS, orçamento, gerar OS",
+    "tags": "ordem de serviço, OS, orçamento, gerar OS, converter orçamento, aprovação, aprovado",
     "descricao": null,
     "categoria_nome": "Ordens de Serviço"
   },
@@ -211,7 +211,7 @@
     "id": 25,
     "titulo": "Importar O.S na nota fiscal",
     "url": "https://www.youtube.com/watch?v=WNA_it03Ti0&t=1s",
-    "tags": "ordem de serviço, OS, nota fiscal, importar OS, NFe",
+    "tags": "ordem de serviço, OS, nota fiscal, importar OS, NFe, faturar OS, emitir nota, serviço fiscal",
     "descricao": null,
     "categoria_nome": "Fiscal"
   },
@@ -219,7 +219,7 @@
     "id": 30,
     "titulo": "Liberação de CFOP, IBS e CBS do produto",
     "url": "https://www.youtube.com/watch?v=s8YIS-KCJBQ",
-    "tags": "CFOP, IBS, CBS, produto, liberação, reforma tributária",
+    "tags": "CFOP, IBS, CBS, produto, liberação, reforma tributária, tributação, fiscal, imposto, código fiscal",
     "descricao": null,
     "categoria_nome": "Fiscal"
   },
@@ -227,15 +227,15 @@
     "id": 34,
     "titulo": "Nota de compra para uso e consumo",
     "url": "https://drive.google.com/file/d/1rEZRsVMW-ASQmYG1DfYCAJzskh8eKKlq/view?usp=sharing",
-    "tags": "nota de compra, uso e consumo",
+    "tags": "nota de compra, uso e consumo, entrada, compra interna, despesa, material, consumo",
     "descricao": null,
     "categoria_nome": "Fiscal"
   },
   {
     "id": 8,
     "titulo": "Nota de fornecedor manual",
-    "url": "https://www.youtube.com/watch?v=xSmPD5xVprQ",
-    "tags": "nota fiscal manual, NFe manual, fornecedor, compra",
+    "url": "https://drive.google.com/file/d/1mKuh7WNUw8tKWzOgxqvjpN8hrHrGbMdE/view?usp=sharing",
+    "tags": "nota fiscal manual, NFe manual, fornecedor, compra, digitar nota, entrada manual, lançar nota",
     "descricao": null,
     "categoria_nome": "Fiscal"
   },
@@ -243,7 +243,7 @@
     "id": 9,
     "titulo": "Nota de fornecedor manual — inserindo os produtos",
     "url": "https://www.youtube.com/watch?v=xSmPD5xVprQ",
-    "tags": "nota fiscal manual, inserir produtos, NFe, fornecedor",
+    "tags": "nota fiscal manual, inserir produtos, NFe, fornecedor, adicionar produtos, lançar itens, entrada",
     "descricao": null,
     "categoria_nome": "Fiscal"
   },
@@ -251,7 +251,7 @@
     "id": 7,
     "titulo": "Nota de fornecedores - importação",
     "url": "https://www.youtube.com/watch?v=zHSFtihqfLo",
-    "tags": "nota fiscal, importação de nota, NFe, fornecedor, compra",
+    "tags": "nota fiscal, importação de nota, NFe, fornecedor, compra, importar XML, XML, nota de entrada",
     "descricao": null,
     "categoria_nome": "Fiscal"
   },
@@ -259,7 +259,7 @@
     "id": 19,
     "titulo": "Plano de contas e centro de custos",
     "url": "https://www.youtube.com/watch?v=fD-1VZC0X7s",
-    "tags": "plano de contas, centro de custo",
+    "tags": "plano de contas, centro de custo, contabilidade, categoria, financeiro, gerencial, classificação",
     "descricao": null,
     "categoria_nome": "Financeiro"
   },
@@ -267,7 +267,7 @@
     "id": 17,
     "titulo": "Resuminho do PDV",
     "url": "https://www.youtube.com/watch?v=ychLHt3X6G0",
-    "tags": "PDV, ponto de venda, venda, resumo",
+    "tags": "PDV, ponto de venda, venda, resumo, caixa, frente de caixa, NFC-e, balcão, vender",
     "descricao": null,
     "categoria_nome": "Venda/PDV"
   },
@@ -275,7 +275,7 @@
     "id": 32,
     "titulo": "Salvar nota no Windows",
     "url": "https://drive.google.com/file/d/19Pt04BklLf_4Ts8nQ6-UCGaiiQuPCoAB/view?usp=sharing",
-    "tags": "salvar nota, XML, nota fiscal",
+    "tags": "salvar nota, XML, nota fiscal, download, arquivo, pasta, DANFE, guardar, baixar",
     "descricao": null,
     "categoria_nome": "Fiscal"
   },
@@ -283,7 +283,7 @@
     "id": 24,
     "titulo": "Transferência de contas",
     "url": "https://www.youtube.com/watch?v=vwH0cyylHiQ",
-    "tags": "transferência, conta, banco",
+    "tags": "transferência, conta, banco, PIX, movimentação, caixa, saldo, TED",
     "descricao": null,
     "categoria_nome": "Financeiro"
   }
