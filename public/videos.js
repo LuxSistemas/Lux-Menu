@@ -28,6 +28,31 @@ function renderTags(tags) {
     return tags.split(',').map(t => t.trim()).filter(Boolean).map(t => `<span>${escapeHtml(t)}</span>`).join('');
 }
 
+function cardEditHtml(v) {
+    const opts = categorias.map(c =>
+        `<option value="${c.id}"${Number(v.categoria_id) === c.id ? ' selected' : ''}>${escapeHtml(c.nome)}</option>`
+    ).join('');
+    return `
+        <div class="vedit">
+            <div class="row2">
+                <input class="ei-titulo" placeholder="Título" value="${escapeHtml(v.titulo)}">
+                <input class="ei-url" placeholder="Link do YouTube" value="${escapeHtml(v.url)}">
+            </div>
+            <div class="row2">
+                <input class="ei-tags" placeholder="Palavras-chave separadas por vírgula" value="${escapeHtml(v.tags || '')}">
+                <select class="ei-categoria">
+                    <option value="">Sem categoria</option>
+                    ${opts}
+                </select>
+            </div>
+            <input class="ei-descricao" placeholder="Descrição (opcional)" value="${escapeHtml(v.descricao || '')}" style="width:100%;margin-bottom:8px">
+            <div class="vedit-actions">
+                <button class="btn ei-salvar" data-id="${v.id}">Salvar</button>
+                <button class="btn cancelar ei-cancelar" data-id="${v.id}">Cancelar</button>
+            </div>
+        </div>`;
+}
+
 function cardHtml(v) {
     const thumb = thumbUrl(v.url);
     return `
@@ -150,6 +175,8 @@ $('lista').addEventListener('click', async (e) => {
     const copyBtn = e.target.closest('.copy');
     const editBtn = e.target.closest('.edit');
     const delBtn = e.target.closest('.del');
+    const salvarBtn = e.target.closest('.ei-salvar');
+    const cancelarBtn = e.target.closest('.ei-cancelar');
 
     if (copyBtn) {
         const ok = await copiarTexto(copyBtn.dataset.url);
@@ -160,8 +187,43 @@ $('lista').addEventListener('click', async (e) => {
     }
 
     if (editBtn) {
-        const video = cacheVideos.find(v => v.id === Number(editBtn.dataset.id));
-        if (video) preencherForm(video);
+        const id = Number(editBtn.dataset.id);
+        const video = cacheVideos.find(v => v.id === id);
+        if (!video) return;
+        const card = $('lista').querySelector(`.vcard[data-id="${id}"]`);
+        if (card) { card.innerHTML = cardEditHtml(video); card.classList.add('editando'); }
+        return;
+    }
+
+    if (salvarBtn) {
+        const id = Number(salvarBtn.dataset.id);
+        const card = $('lista').querySelector(`.vcard[data-id="${id}"]`);
+        if (!card) return;
+        const titulo = card.querySelector('.ei-titulo').value.trim();
+        const url = card.querySelector('.ei-url').value.trim();
+        if (!titulo || !url) { alert('Título e link são obrigatórios.'); return; }
+        const payload = {
+            titulo, url,
+            tags: card.querySelector('.ei-tags').value.trim(),
+            descricao: card.querySelector('.ei-descricao').value.trim(),
+            categoria_id: card.querySelector('.ei-categoria').value || null,
+        };
+        try {
+            const updated = await api(`/api/videos/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+            const cat = categorias.find(c => String(c.id) === String(payload.categoria_id));
+            const novoVideo = { ...updated, categoria_nome: cat?.nome || null };
+            const idx = cacheVideos.findIndex(v => v.id === id);
+            if (idx !== -1) cacheVideos[idx] = novoVideo;
+            card.outerHTML = cardHtml(novoVideo);
+        } catch (err) { alert(err.message); }
+        return;
+    }
+
+    if (cancelarBtn) {
+        const id = Number(cancelarBtn.dataset.id);
+        const video = cacheVideos.find(v => v.id === id);
+        const card = $('lista').querySelector(`.vcard[data-id="${id}"]`);
+        if (video && card) card.outerHTML = cardHtml(video);
         return;
     }
 
