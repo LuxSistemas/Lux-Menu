@@ -6,16 +6,19 @@
 <div class="wrap">
     <p class="eyebrow">Suporte · Treinamento</p>
     <h1>Vídeos Tutoriais</h1>
-    <p class="sub">Busque pelo assunto (ex: "nota de compra", "importação", "backup") e assista ao vídeo.</p>
+    <p class="sub">Busque pelo assunto ou navegue pelas categorias abaixo.</p>
 
-    <div class="buscabox"><input id="busca" placeholder="Buscar por título, tema ou palavra-chave..." autofocus></div>
+    <div class="buscabox">
+        <input id="busca" placeholder="Buscar por título, tema ou palavra-chave...">
+        <button class="limpar" id="limpar" title="Limpar busca">✕</button>
+    </div>
 
-    <div class="catchips" id="catchips"></div>
+    <div class="sugestoes" id="sugestoes"></div>
 
-    <div class="lista" id="lista"></div>
+    <div id="lista"></div>
     <div class="empty" id="empty" style="display:none">Nenhum vídeo encontrado para essa busca.</div>
 
-    <footer>biblioteca de vídeos tutoriais</footer>
+    <footer>biblioteca de vídeos tutoriais · LuxSistemas</footer>
 </div>
 
 <script type="module" src="app.js"></script>

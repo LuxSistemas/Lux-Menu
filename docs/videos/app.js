@@ -18,26 +18,33 @@ function thumbUrl(url) {
 
 async function copiarTexto(texto) {
     if (navigator.clipboard && window.isSecureContext) {
-        try { await navigator.clipboard.writeText(texto); return true; } catch (e) { /* cai no fallback abaixo */ }
+        try { await navigator.clipboard.writeText(texto); return true; } catch (e) { /* fallback abaixo */ }
     }
     try {
-        const textarea = document.createElement('textarea');
-        textarea.value = texto;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
+        const ta = document.createElement('textarea');
+        ta.value = texto;
+        ta.style.cssText = 'position:fixed;opacity:0';
+        document.body.appendChild(ta);
+        ta.focus(); ta.select();
         const ok = document.execCommand('copy');
-        document.body.removeChild(textarea);
+        document.body.removeChild(ta);
         return ok;
     } catch (e) { return false; }
 }
 
-function renderTags(tags) {
-    if (!tags) return '';
-    return tags.split(',').map(t => t.trim()).filter(Boolean).map(t => `<span>${escapeHtml(t)}</span>`).join('');
-}
+const CAT_ICONES = {
+    'Fiscal': '🧾',
+    'Financeiro': '💰',
+    'Cadastros': '📋',
+    'Ordens de Serviço': '🔧',
+    'Orçamentos': '📝',
+    'Venda/PDV': '🛒',
+};
+
+const SUGESTOES = [
+    'nota de compra', 'devolução', 'nota fiscal',
+    'cadastro de cliente', 'ordem de serviço', 'orçamento', 'PDV', 'PIX',
+];
 
 function cardHtml(v) {
     const thumb = thumbUrl(v.url);
@@ -45,12 +52,10 @@ function cardHtml(v) {
         <div class="vcard">
             ${thumb ? `<img class="vthumb" src="${thumb}" alt="">` : '<div class="vthumb"></div>'}
             <div class="vbody">
-                ${v.categoria_nome ? `<div class="vcategoria">${escapeHtml(v.categoria_nome)}</div>` : ''}
                 <h2>${escapeHtml(v.titulo)}</h2>
                 ${v.descricao ? `<p class="vdesc">${escapeHtml(v.descricao)}</p>` : ''}
-                <div class="vtags">${renderTags(v.tags)}</div>
                 <div class="vactions">
-                    <a href="${escapeHtml(v.url)}" target="_blank" rel="noopener">assistir</a>
+                    <a href="${escapeHtml(v.url)}" target="_blank" rel="noopener">▶ assistir</a>
                     <button class="copy" data-url="${escapeHtml(v.url)}">copiar link</button>
                 </div>
             </div>
@@ -58,7 +63,6 @@ function cardHtml(v) {
 }
 
 let todosVideos = [];
-let categoriaFiltro = '';
 let fuseIndex = null;
 
 function construirFuse() {
@@ -74,17 +78,6 @@ function construirFuse() {
         minMatchCharLength: 2,
         shouldSort: true,
     });
-}
-
-function categoriasUnicas() {
-    const nomes = [...new Set(todosVideos.map(v => v.categoria_nome).filter(Boolean))];
-    return nomes.sort((a, b) => a.localeCompare(b, 'pt-BR'));
-}
-
-function renderCatchips() {
-    $('catchips').innerHTML = ['<button class="catchip active" data-nome="">Todas</button>']
-        .concat(categoriasUnicas().map(nome => `<button class="catchip" data-nome="${escapeHtml(nome)}">${escapeHtml(nome)}</button>`))
-        .join('');
 }
 
 function buscarFuse(busca) {
@@ -106,59 +99,87 @@ function buscarFuse(busca) {
     return resultados;
 }
 
+function renderAgrupado() {
+    const grupos = {};
+    for (const v of todosVideos) {
+        const cat = v.categoria_nome || 'Outros';
+        if (!grupos[cat]) grupos[cat] = [];
+        grupos[cat].push(v);
+    }
+
+    const ordem = Object.keys(grupos).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+    $('lista').innerHTML = ordem.map(cat => `
+        <div class="cat-grupo">
+            <h2 class="cat-header">${CAT_ICONES[cat] || '📁'} ${escapeHtml(cat)}</h2>
+            ${grupos[cat].map(cardHtml).join('')}
+        </div>
+    `).join('');
+
+    $('empty').style.display = 'none';
+}
+
 function renderLista() {
     const busca = $('busca').value.trim();
-    let filtrados;
+    document.querySelector('.buscabox').classList.toggle('com-texto', busca.length > 0);
 
-    if (busca.length >= 2 && fuseIndex) {
-        filtrados = buscarFuse(busca);
-    } else {
-        filtrados = [...todosVideos];
+    if (!busca) {
+        renderAgrupado();
+        return;
     }
 
-    if (categoriaFiltro) {
-        filtrados = filtrados.filter(v => v.categoria_nome === categoriaFiltro);
-    }
+    const filtrados = buscarFuse(busca);
 
-    const lista = $('lista');
-    const empty = $('empty');
     if (!filtrados.length) {
-        lista.innerHTML = '';
-        empty.style.display = 'block';
+        $('lista').innerHTML = '';
+        $('empty').style.display = 'block';
     } else {
-        empty.style.display = 'none';
-        lista.innerHTML = filtrados.map(cardHtml).join('');
+        $('empty').style.display = 'none';
+        $('lista').innerHTML =
+            `<p class="resultado-info">${filtrados.length} vídeo${filtrados.length !== 1 ? 's' : ''} encontrado${filtrados.length !== 1 ? 's' : ''}</p>` +
+            filtrados.map(cardHtml).join('');
     }
 }
+
+// ── Eventos ──
 
 $('lista').addEventListener('click', async (e) => {
     const copyBtn = e.target.closest('.copy');
     if (!copyBtn) return;
     const ok = await copiarTexto(copyBtn.dataset.url);
-    copyBtn.textContent = ok ? 'copiado ✓' : 'não copiou, selecione manualmente';
+    copyBtn.textContent = ok ? 'copiado ✓' : 'selecione manualmente';
     if (ok) copyBtn.classList.add('ok');
     setTimeout(() => { copyBtn.textContent = 'copiar link'; copyBtn.classList.remove('ok'); }, 1800);
 });
 
-$('catchips').addEventListener('click', (e) => {
-    const btn = e.target.closest('.catchip');
+$('sugestoes').addEventListener('click', (e) => {
+    const btn = e.target.closest('.sugestao');
     if (!btn) return;
-    $('catchips').querySelectorAll('.catchip').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    categoriaFiltro = btn.dataset.nome;
+    $('busca').value = btn.textContent;
+    renderLista();
+    $('busca').focus();
+});
+
+$('limpar').addEventListener('click', () => {
+    $('busca').value = '';
     renderLista();
 });
 
 let debounce;
 $('busca').addEventListener('input', () => {
     clearTimeout(debounce);
-    debounce = setTimeout(renderLista, 200);
+    debounce = setTimeout(renderLista, 180);
 });
 
+// ── Init ──
+
 (async function init() {
+    $('sugestoes').innerHTML = SUGESTOES.map(s =>
+        `<button class="sugestao">${escapeHtml(s)}</button>`
+    ).join('');
+
     const res = await fetch('videos.json');
     todosVideos = await res.json();
     construirFuse();
-    renderCatchips();
-    renderLista();
+    renderAgrupado();
 })();
