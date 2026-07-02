@@ -161,3 +161,15 @@ async function copiarTexto(texto) {
     if (document.body) criarBarraUsuario();
     else document.addEventListener('DOMContentLoaded', criarBarraUsuario);
 })();
+
+// Carrega o widget de chat lateral em todas as páginas autenticadas
+(function () {
+    function carregarChatWidget() {
+        if (document.getElementById('cwBtn')) return;
+        const s = document.createElement('script');
+        s.src = '/chat-widget.js';
+        document.body.appendChild(s);
+    }
+    if (document.body) carregarChatWidget();
+    else document.addEventListener('DOMContentLoaded', carregarChatWidget);
+})();
