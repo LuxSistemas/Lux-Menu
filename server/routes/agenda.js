@@ -8,6 +8,11 @@ function pessoaValida(pessoa_id) {
     return !!db.prepare('SELECT id FROM pessoas_escala WHERE id = ?').get(pessoa_id);
 }
 
+const URGENCIAS_VALIDAS = ['alta', 'media', 'baixa'];
+function urgenciaValida(urgencia) {
+    return urgencia === undefined || urgencia === null || urgencia === '' || URGENCIAS_VALIDAS.includes(urgencia);
+}
+
 // --- Compromissos ---
 
 router.get('/compromissos', (req, res) => {
@@ -87,14 +92,15 @@ router.get('/tarefas', (req, res) => {
 });
 
 router.post('/tarefas', (req, res) => {
-    const { titulo, descricao, data, hora, pessoa_id } = req.body;
+    const { titulo, descricao, data, hora, pessoa_id, urgencia } = req.body;
     if (!titulo || !titulo.trim()) return res.status(400).json({ error: 'título é obrigatório' });
     if (!pessoaValida(pessoa_id)) return res.status(400).json({ error: 'pessoa inválida' });
+    if (!urgenciaValida(urgencia)) return res.status(400).json({ error: 'urgência inválida' });
 
     const info = db.prepare(`
-        INSERT INTO agenda_tarefas (titulo, descricao, data, hora, pessoa_id, feito, criado_em)
-        VALUES (?, ?, ?, ?, ?, 0, ?)
-    `).run(titulo.trim(), descricao && descricao.trim() ? descricao.trim() : null, data || null, hora || null, pessoa_id || null, new Date().toISOString());
+        INSERT INTO agenda_tarefas (titulo, descricao, data, hora, pessoa_id, urgencia, feito, criado_em)
+        VALUES (?, ?, ?, ?, ?, ?, 0, ?)
+    `).run(titulo.trim(), descricao && descricao.trim() ? descricao.trim() : null, data || null, hora || null, pessoa_id || null, urgencia || null, new Date().toISOString());
 
     res.status(201).json(db.prepare(`
         SELECT t.*, p.nome AS pessoa_nome FROM agenda_tarefas t
@@ -112,14 +118,16 @@ router.put('/tarefas/:id', (req, res) => {
     const hora = req.body.hora !== undefined ? (req.body.hora || null) : atual.hora;
     const pessoa_id = req.body.pessoa_id !== undefined ? (req.body.pessoa_id || null) : atual.pessoa_id;
     const feito = req.body.feito !== undefined ? (req.body.feito ? 1 : 0) : atual.feito;
+    const urgencia = req.body.urgencia !== undefined ? (req.body.urgencia || null) : atual.urgencia;
 
     if (!titulo) return res.status(400).json({ error: 'título é obrigatório' });
     if (!pessoaValida(pessoa_id)) return res.status(400).json({ error: 'pessoa inválida' });
+    if (!urgenciaValida(urgencia)) return res.status(400).json({ error: 'urgência inválida' });
 
     db.prepare(`
-        UPDATE agenda_tarefas SET titulo = ?, descricao = ?, data = ?, hora = ?, pessoa_id = ?, feito = ?
+        UPDATE agenda_tarefas SET titulo = ?, descricao = ?, data = ?, hora = ?, pessoa_id = ?, feito = ?, urgencia = ?
         WHERE id = ?
-    `).run(titulo, descricao, data, hora, pessoa_id, feito, atual.id);
+    `).run(titulo, descricao, data, hora, pessoa_id, feito, urgencia, atual.id);
 
     res.json(db.prepare(`
         SELECT t.*, p.nome AS pessoa_nome FROM agenda_tarefas t

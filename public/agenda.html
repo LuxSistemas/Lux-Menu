@@ -595,6 +595,86 @@
         color: #9A3B22;
     }
 
+    .urgencia-filtros {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+
+    .ufiltro {
+        font-size: 12.5px;
+        font-family: var(--sans);
+        border: 1px solid var(--rule-strong);
+        background: var(--card);
+        color: var(--ink-soft);
+        border-radius: 20px;
+        padding: 4px 12px;
+        cursor: pointer;
+    }
+
+    .ufiltro:hover {
+        border-color: var(--stamp);
+        color: var(--stamp);
+    }
+
+    .ufiltro.active {
+        background: var(--stamp);
+        border-color: var(--stamp);
+        color: #fff;
+    }
+
+    .add-tarefa-rapida select {
+        border: 1px solid var(--rule-strong);
+        border-radius: 7px;
+        padding: 8px 10px;
+        font-size: 13.5px;
+        font-family: var(--sans);
+        background: var(--card);
+        color: var(--ink);
+    }
+
+    .tarefa-linha {
+        border-left: 3px solid transparent;
+    }
+
+    .tarefa-linha.urg-alta {
+        border-left-color: #9A3B22;
+    }
+
+    .tarefa-linha.urg-media {
+        border-left-color: var(--diferido);
+    }
+
+    .tarefa-linha.urg-baixa {
+        border-left-color: var(--recolher);
+    }
+
+    .tarefa-urgencia {
+        font-family: var(--mono);
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        border-radius: 20px;
+        padding: 1px 8px;
+    }
+
+    .tarefa-urgencia.urg-alta {
+        color: #9A3B22;
+        background: rgba(154, 59, 34, .12);
+    }
+
+    .tarefa-urgencia.urg-media {
+        color: var(--diferido);
+        background: var(--diferido-bg);
+    }
+
+    .tarefa-urgencia.urg-baixa {
+        color: var(--recolher);
+        background: var(--recolher-bg);
+    }
+
     .vazio-grupo {
         font-size: 12px;
         color: var(--ink-faint);
@@ -676,6 +756,12 @@
 
     <div class="card tarefas-board-card" id="painelTarefas">
         <h2>Tarefas</h2>
+        <div class="urgencia-filtros" id="urgenciaFiltros">
+            <button type="button" class="ufiltro active" data-urgencia="">Todas</button>
+            <button type="button" class="ufiltro" data-urgencia="alta">🔴 Alta</button>
+            <button type="button" class="ufiltro" data-urgencia="media">🟡 Média</button>
+            <button type="button" class="ufiltro" data-urgencia="baixa">🟢 Baixa</button>
+        </div>
         <div class="board-scroll-sync" id="boardScrollSync"><div id="boardScrollSyncTrack"></div></div>
         <div class="tarefas-board" id="tarefasBoard"></div>
     </div>
@@ -761,6 +847,14 @@
             <label for="tarefaEditPessoa">Responsável</label>
             <select id="tarefaEditPessoa">
                 <option value="">Geral</option>
+            </select>
+
+            <label for="tarefaEditUrgencia">Urgência</label>
+            <select id="tarefaEditUrgencia">
+                <option value="">Sem urgência</option>
+                <option value="alta">🔴 Alta</option>
+                <option value="media">🟡 Média</option>
+                <option value="baixa">🟢 Baixa</option>
             </select>
 
             <div class="modal-acoes">

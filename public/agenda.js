@@ -37,6 +37,39 @@ $('agendaTabs').addEventListener('click', (e) => {
     atualizarLargura();
 })();
 
+// Auto-scroll ao encostar o mouse nas bordas esquerda/direita da tela enquanto o
+// painel de tarefas está visível. Velocidade aumenta quanto mais perto da borda.
+(function configurarEdgeScroll() {
+    const board = $('tarefasBoard');
+    const painel = $('painelTarefas');
+    const ZONA = 100;   // px da borda que ativa o scroll
+    const VEL_MAX = 20; // px por frame no máximo
+
+    let vx = 0;
+    let rafId = null;
+
+    function passo() {
+        board.scrollLeft += vx;
+        rafId = vx !== 0 ? requestAnimationFrame(passo) : null;
+    }
+
+    document.addEventListener('mousemove', (e) => {
+        if (painel.style.display === 'none') { vx = 0; return; }
+
+        const x = e.clientX;
+        const w = window.innerWidth;
+        const novaVx =
+            x < ZONA       ? -Math.round(VEL_MAX * Math.pow(1 - x / ZONA, 1.5))
+            : x > w - ZONA ? Math.round(VEL_MAX * Math.pow(1 - (w - x) / ZONA, 1.5))
+            : 0;
+
+        vx = novaVx;
+        if (vx !== 0 && !rafId) rafId = requestAnimationFrame(passo);
+    });
+
+    document.addEventListener('mouseleave', () => { vx = 0; });
+})();
+
 function paraISO(d) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
@@ -96,6 +129,17 @@ let compromissosFuturos = [];
 let tarefas = [];
 let pessoas = [];
 let modalAberto = false;
+let filtroUrgencia = '';
+
+const URGENCIA_LABEL = { alta: '🔴 Alta', media: '🟡 Média', baixa: '🟢 Baixa' };
+
+$('urgenciaFiltros').addEventListener('click', (e) => {
+    const btn = e.target.closest('.ufiltro');
+    if (!btn) return;
+    $('urgenciaFiltros').querySelectorAll('.ufiltro').forEach((b) => b.classList.toggle('active', b === btn));
+    filtroUrgencia = btn.dataset.urgencia;
+    renderQuadro();
+});
 
 function corPessoa(pessoa_id) {
     const p = pessoas.find((x) => x.id === pessoa_id);
@@ -196,7 +240,9 @@ function renderQuadro() {
     const colunas = [{ id: null, nome: 'Geral' }, ...pessoasOrdenadas.map((p) => ({ id: p.id, nome: p.nome }))];
 
     $('tarefasBoard').innerHTML = colunas.map((col) => {
-        const tarefasCol = tarefas.filter((t) => (t.pessoa_id || null) === col.id);
+        const tarefasCol = tarefas
+            .filter((t) => (t.pessoa_id || null) === col.id)
+            .filter((t) => !filtroUrgencia || t.urgencia === filtroUrgencia);
         const pendentes = tarefasCol.filter((t) => !t.feito);
         const concluidas = tarefasCol.filter((t) => t.feito);
         const compsCol = compromissosFuturos.filter((c) => (c.pessoa_id || null) === col.id);
@@ -222,6 +268,12 @@ function renderQuadro() {
                     <input type="date" class="add-tarefa-data" title="data (opcional)">
                     <input type="time" class="add-tarefa-hora" title="horário (opcional)">
                 </div>
+                <select class="add-tarefa-urgencia" title="urgência (opcional)">
+                    <option value="">Sem urgência</option>
+                    <option value="alta">🔴 Alta</option>
+                    <option value="media">🟡 Média</option>
+                    <option value="baixa">🟢 Baixa</option>
+                </select>
                 <div class="add-tarefa-acoes">
                     <button type="submit" class="btn">Adicionar</button>
                     <button type="button" class="btn secundario btn-cancelar-tarefa">Cancelar</button>
@@ -327,6 +379,7 @@ function renderQuadro() {
             const descInput = form.querySelector('.add-tarefa-desc');
             const dataInput = form.querySelector('.add-tarefa-data');
             const horaInput = form.querySelector('.add-tarefa-hora');
+            const urgenciaInput = form.querySelector('.add-tarefa-urgencia');
             const titulo = input.value.trim();
             if (!titulo) return;
             try {
@@ -338,12 +391,14 @@ function renderQuadro() {
                         pessoa_id: form.dataset.pessoa || null,
                         data: dataInput.value || null,
                         hora: horaInput.value || null,
+                        urgencia: urgenciaInput.value || null,
                     }),
                 });
                 input.value = '';
                 descInput.value = '';
                 dataInput.value = '';
                 horaInput.value = '';
+                urgenciaInput.value = '';
                 await carregarTarefas();
             } catch (err) { alert(err.message); }
         });
@@ -356,7 +411,8 @@ function linhaTarefaHtml(t) {
         ...pessoas.filter((p) => p.ativo || p.id === t.pessoa_id)
             .map((p) => `<button type="button" class="tarefa-mover-opcao" data-id="${t.id}" data-pessoa="${p.id}">${escapeHtml(p.nome)}</button>`),
     ].join('');
-    return `<div class="tarefa-linha ${t.feito ? 'feita' : ''}">
+    const temMeta = t.data || t.urgencia;
+    return `<div class="tarefa-linha ${t.feito ? 'feita' : ''} ${t.urgencia ? 'urg-' + t.urgencia : ''}">
         <div class="tarefa-principal">
             <input type="checkbox" class="tarefa-check" data-id="${t.id}" ${t.feito ? 'checked' : ''}>
             <div class="tarefa-textos">
@@ -378,7 +434,10 @@ function linhaTarefaHtml(t) {
                 </div>
             </details>
         </div>
-        ${t.data ? `<div class="tarefa-meta"><span class="tarefa-data">${formatarDataBR(t.data)}${t.hora ? ' ' + t.hora : ''}</span></div>` : ''}
+        ${temMeta ? `<div class="tarefa-meta">
+            ${t.data ? `<span class="tarefa-data">${formatarDataBR(t.data)}${t.hora ? ' ' + t.hora : ''}</span>` : ''}
+            ${t.urgencia ? `<span class="tarefa-urgencia urg-${t.urgencia}">${URGENCIA_LABEL[t.urgencia]}</span>` : ''}
+        </div>` : ''}
     </div>`;
 }
 
@@ -486,6 +545,7 @@ function abrirModalTarefa(t) {
     $('tarefaEditData').value = t.data || '';
     $('tarefaEditHora').value = t.hora || '';
     $('tarefaEditPessoa').value = t.pessoa_id || '';
+    $('tarefaEditUrgencia').value = t.urgencia || '';
     $('overlayTarefa').style.display = 'flex';
     $('tarefaEditTitulo').focus();
 }
@@ -509,6 +569,7 @@ $('formTarefaEditar').addEventListener('submit', async (e) => {
         data: $('tarefaEditData').value || null,
         hora: $('tarefaEditHora').value || null,
         pessoa_id: $('tarefaEditPessoa').value || null,
+        urgencia: $('tarefaEditUrgencia').value || null,
     };
     try {
         await api(`/api/agenda/tarefas/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
