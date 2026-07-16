@@ -132,6 +132,7 @@ let modalAberto = false;
 let filtroUrgencia = '';
 
 const URGENCIA_LABEL = { alta: '🔴 Alta', media: '🟡 Média', baixa: '🟢 Baixa' };
+const RANK_URGENCIA = { alta: 0, media: 1, baixa: 2, __sem: 3 };
 
 $('urgenciaFiltros').addEventListener('click', (e) => {
     const btn = e.target.closest('.ufiltro');
@@ -251,6 +252,9 @@ function renderQuadro() {
             ...pendentes.map((t) => ({ tipo: 'tarefa', data: t.data, hora: t.hora || '', obj: t })),
             ...compsCol.map((c) => ({ tipo: 'compromisso', data: c.data, hora: c.hora_inicio, obj: c })),
         ].sort((a, b) => {
+            const rankA = RANK_URGENCIA[a.obj.urgencia] ?? RANK_URGENCIA.__sem;
+            const rankB = RANK_URGENCIA[b.obj.urgencia] ?? RANK_URGENCIA.__sem;
+            if (rankA !== rankB) return rankA - rankB;
             if (!a.data && !b.data) return 0;
             if (!a.data) return 1;
             if (!b.data) return -1;
