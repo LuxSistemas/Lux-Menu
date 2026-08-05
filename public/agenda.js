@@ -37,39 +37,6 @@ $('agendaTabs').addEventListener('click', (e) => {
     atualizarLargura();
 })();
 
-// Auto-scroll ao encostar o mouse nas bordas esquerda/direita da tela enquanto o
-// painel de tarefas está visível. Velocidade aumenta quanto mais perto da borda.
-(function configurarEdgeScroll() {
-    const board = $('tarefasBoard');
-    const painel = $('painelTarefas');
-    const ZONA = 100;   // px da borda que ativa o scroll
-    const VEL_MAX = 20; // px por frame no máximo
-
-    let vx = 0;
-    let rafId = null;
-
-    function passo() {
-        board.scrollLeft += vx;
-        rafId = vx !== 0 ? requestAnimationFrame(passo) : null;
-    }
-
-    document.addEventListener('mousemove', (e) => {
-        if (painel.style.display === 'none') { vx = 0; return; }
-
-        const x = e.clientX;
-        const w = window.innerWidth;
-        const novaVx =
-            x < ZONA       ? -Math.round(VEL_MAX * Math.pow(1 - x / ZONA, 1.5))
-            : x > w - ZONA ? Math.round(VEL_MAX * Math.pow(1 - (w - x) / ZONA, 1.5))
-            : 0;
-
-        vx = novaVx;
-        if (vx !== 0 && !rafId) rafId = requestAnimationFrame(passo);
-    });
-
-    document.addEventListener('mouseleave', () => { vx = 0; });
-})();
-
 function paraISO(d) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
@@ -560,9 +527,6 @@ function fecharModalTarefa() {
 }
 
 $('btnCancelarTarefaEdit').addEventListener('click', fecharModalTarefa);
-$('overlayTarefa').addEventListener('click', (e) => {
-    if (e.target.id === 'overlayTarefa') fecharModalTarefa();
-});
 
 $('formTarefaEditar').addEventListener('submit', async (e) => {
     e.preventDefault();
