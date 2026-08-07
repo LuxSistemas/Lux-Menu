@@ -3,6 +3,7 @@ data/
 data-teste/
 *.log
 .env
+*.traineddata
 
 # dados reais de clientes (CNPJ, contato, etc.) - nunca versionar
 server/seed/DB_CLIENTES.csv

@@ -1,0 +1,504 @@
+import Fuse from './fuse.min.mjs';
+
+const $ = (id) => document.getElementById(id);
+
+function escapeHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+}
+
+function extrairIdYoutube(url) {
+    const m = String(url || '').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]{6,})/);
+    return m ? m[1] : null;
+}
+
+function thumbUrl(url) {
+    const id = extrairIdYoutube(url);
+    return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : '';
+}
+
+// Tira acento e caixa pra "devolucao" achar "Devolução", "carro" achar "Carro" etc.
+function normalizarTexto(str) {
+    return String(str ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+
+// Cada nó pode ter até 4 categorias de vídeo, nessa ordem de exibição:
+// geral (visão geral — o primeiro que um cliente novo assiste), essenciais
+// (funções mais importantes), erros (problemas comuns) e avancado (dicas extras).
+// Só alguns nós têm vídeos reais nessa primeira leva do protótipo — o resto do
+// menu existe pra mostrar a navegação completa, mas ainda é placeholder.
+const CATEGORIAS_VIDEO = [
+    { chave: 'geral', label: 'Visão geral' },
+    { chave: 'essenciais', label: 'Funções importantes' },
+    { chave: 'erros', label: 'Erros comuns' },
+    { chave: 'avancado', label: 'Dicas avançadas' },
+];
+
+const VIDEOS_RETAGUARDA = {
+    // fiscal>nfe e servicos>ordem-servico estão com as 4 categorias completas como
+    // exemplo/maquete pra equipe — o vídeo de "erros comuns" de cada um é um vídeo
+    // real só emprestado (ainda não é sobre esse erro específico), pra mostrar como
+    // vai ficar quando o vídeo certo for gravado.
+    'fiscal>nfe': { geral: [38], essenciais: [36, 27, 25], erros: [6], avancado: [32, 31] },
+    'servicos>ordem-servico': { geral: [11], essenciais: [13, 12, 25], erros: [5], avancado: [14] },
+    'faturas': { geral: [3] },
+};
+
+const VIDEOS_PDV = {
+    'caixa>resumo-caixa': { geral: [17] },
+    'concluir-venda': { essenciais: [29] },
+};
+
+const MENU_RETAGUARDA = [
+    { id: 'inicio', label: 'Início', icone: '🏠' },
+    { id: 'acesso', label: 'Acesso', icone: '🔑' },
+    {
+        id: 'pessoas', label: 'Pessoas', icone: '👥',
+        submenu: [
+            { id: 'contatos', label: 'Contatos' },
+            { id: 'vendedores', label: 'Vendedores' },
+            { id: 'contador', label: 'Contador' },
+        ],
+    },
+    {
+        id: 'estoque', label: 'Estoque', icone: '📦',
+        submenu: [
+            { id: 'produtos', label: 'Produtos' },
+            { id: 'grupo', label: 'Grupo' },
+            { id: 'unidades', label: 'Unidades' },
+            { id: 'marcas', label: 'Marcas' },
+            { id: 'imp-etiqueta', label: 'Imp. de Etiqueta' },
+            { id: 'ajuste-estoque', label: 'Ajuste de Estoque' },
+            { id: 'ajuste-estoque-lote', label: 'Ajuste de Estoque em Lote' },
+            { id: 'inventario-mensal', label: 'Inventário Mensal' },
+        ],
+    },
+    {
+        id: 'compras', label: 'Compras', icone: '🛒',
+        submenu: [
+            { id: 'pedido-compra', label: 'Pedido de Compra' },
+            { id: 'lista-compras', label: 'Lista Compras' },
+            { id: 'consulta-notas-fornecedor', label: 'Consulta Notas de Fornecedor' },
+            { id: 'devolucao-compra', label: 'Devolução de Compra' },
+        ],
+    },
+    {
+        id: 'vendas', label: 'Vendas', icone: '💲',
+        submenu: [
+            { id: 'orcamento', label: 'Orçamento' },
+            { id: 'pdv-vendas', label: 'PDV - Vendas' },
+            { id: 'lista-vendas', label: 'Lista de Vendas' },
+            { id: 'devolucao-venda', label: 'Devolução de Venda' },
+            { id: 'contratos', label: 'Contratos' },
+        ],
+    },
+    {
+        id: 'financeiro', label: 'Financeiro', icone: '💰',
+        submenu: [
+            { id: 'formas-pagamento', label: 'Formas de Pagamento' },
+            { id: 'planos-conta', label: 'Planos de Conta' },
+            { id: 'centro-custo', label: 'Centro de Custo' },
+            { id: 'contas', label: 'Contas' },
+            { id: 'contas-pagar', label: 'Contas à Pagar' },
+            { id: 'contas-receber', label: 'Contas à Receber' },
+            { id: 'encontro-contas', label: 'Encontro Contas' },
+            { id: 'ficha-clientes', label: 'Ficha de Clientes' },
+            { id: 'caixas-bancos', label: 'Caixas e Bancos' },
+            { id: 'transferencia-conta', label: 'Transferência de Conta' },
+            { id: 'impressao-recibo', label: 'Impressão de Recibo' },
+        ],
+    },
+    {
+        id: 'fiscal', label: 'Fiscal', icone: '🧾',
+        submenu: [
+            { id: 'nfse', label: 'NFS-e' },
+            { id: 'nfce', label: 'NFC-e' },
+            { id: 'nfe', label: 'NF-e' },
+            { id: 'cfop', label: 'Cadastro de CFOP' },
+        ],
+    },
+    {
+        id: 'servicos', label: 'Serviços', icone: '🔧',
+        submenu: [
+            { id: 'ordem-servico', label: 'Ordem de Serviço' },
+            { id: 'revisao-garantia', label: 'Revisão e Garantia' },
+            { id: 'checklist', label: 'Checklist' },
+            { id: 'diagnostico-ia', label: 'Diagnóstico IA' },
+        ],
+    },
+    {
+        id: 'frotas', label: 'Frotas', icone: '🚚',
+        submenu: [
+            { id: 'cadastro-veiculos', label: 'Cadastro de Veículos' },
+        ],
+    },
+    {
+        id: 'relatorios', label: 'Relatórios', icone: '📊',
+        submenu: [
+            { id: 'rel-os', label: 'Ordens de Serviço' },
+            { id: 'rel-produtos', label: 'Produtos' },
+            { id: 'rel-vendas', label: 'Vendas' },
+            { id: 'rel-financeiro', label: 'Financeiro' },
+            { id: 'rel-resultados', label: 'Resultados' },
+        ],
+    },
+    { id: 'configuracoes', label: 'Configurações', icone: '⚙️' },
+];
+
+const MENU_PDV = [
+    {
+        id: 'caixa', label: 'Caixa', icone: '💵',
+        submenu: [
+            { id: 'fechar-caixa', label: 'Fechar Caixa' },
+            { id: 'resumo-caixa', label: 'Resumo Caixa' },
+            { id: 'sangria', label: 'Sangria' },
+            { id: 'suprimento', label: 'Suprimento' },
+            { id: 'abrir-gaveta', label: 'Abrir Gaveta' },
+            { id: 'reimprimir-nfce', label: 'Reimprimir NFCe' },
+            { id: 'admin-tef', label: 'Administ. TEF' },
+        ],
+    },
+    {
+        id: 'produtos', label: 'Produtos', icone: '📦',
+        submenu: [
+            { id: 'deleta-item', label: 'Deleta Item' },
+            { id: 'deleta-leitor', label: 'Deleta P/ Leitor' },
+            { id: 'desconto-item', label: 'Desconto Item' },
+            { id: 'busca-preco', label: 'Busca Preço' },
+        ],
+    },
+    {
+        id: 'clientes', label: 'Clientes', icone: '👥',
+        submenu: [
+            { id: 'cad-clientes', label: 'Cad. Clientes' },
+            { id: 'receber-conta', label: 'Receber Conta' },
+        ],
+    },
+    { id: 'vendedor', label: 'Vendedor - F3', icone: '🧑' },
+    { id: 'busca-avancada', label: 'Busca Avançada - F4', icone: '🔍' },
+    { id: 'importar', label: 'Importar - F5', icone: '⬇️' },
+    { id: 'cancelar-venda', label: 'Cancelar Venda - F6', icone: '🛒' },
+    { id: 'concluir-venda', label: 'Concluir Venda - F7', icone: '🧾' },
+    { id: 'adicionar-item', label: 'Adicionar Item - F12', icone: '➕' },
+];
+
+const SISTEMAS = {
+    retaguarda: { menu: MENU_RETAGUARDA, videos: VIDEOS_RETAGUARDA },
+    pdv: { menu: MENU_PDV, videos: VIDEOS_PDV },
+};
+
+let sistemaAtivo = 'retaguarda';
+const noPorSistema = { retaguarda: 'fiscal>nfe', pdv: 'caixa>resumo-caixa' };
+let todosVideos = null;
+let fuseIndex = null;
+
+function menuAtual() { return SISTEMAS[sistemaAtivo].menu; }
+function noAtivo() { return noPorSistema[sistemaAtivo]; }
+
+function videosPara(no) {
+    return SISTEMAS[sistemaAtivo].videos[no];
+}
+
+function renderTopo() {
+    if (sistemaAtivo === 'retaguarda') {
+        $('topbar').innerHTML = `
+            <div class="topbar">
+                <div class="marca"><img src="assets/logos/luxauto-logo.png" alt="LuxAUTO"></div>
+                <div class="acoes">
+                    <span class="ac clicavel" id="btnEntrarPdv"><span class="ic">🖨️</span><span class="txt">PDV</span></span>
+                    <span class="ac clicavel" id="btnApp"><span class="ic">📱</span><span class="txt">APP</span></span>
+                    <span class="ac clicavel" id="btnOrdemServico"><span class="ic">📋</span><span class="txt">Ordem de Serviço</span></span>
+                    <span class="ac clicavel" id="btnFaturas"><span class="ic">🧾</span><span class="txt">Faturas</span></span>
+                    <span class="ac redondo"><img src="assets/logos/whatsapp.png" alt="WhatsApp"></span>
+                    <span class="ac redondo">?</span>
+                    <span class="ac"><span class="ic">👤</span><span class="txt">ADMIN</span></span>
+                </div>
+            </div>`;
+        $('tabstrip').innerHTML = `
+            <div class="tabstrip">
+                <div class="tabs">
+                    <div class="tab" id="tabDashboard">Dashboard <span class="x">✕</span></div>
+                    <div class="tab ativa" id="tabModulo">Tutoriais <span class="x">✕</span></div>
+                </div>
+                <a class="voltar" href="videos.html">← voltar pra busca por palavra-chave</a>
+            </div>`;
+        $('btnEntrarPdv').addEventListener('click', () => { sistemaAtivo = 'pdv'; renderTudo(); });
+        $('tabDashboard').addEventListener('click', () => { noPorSistema.retaguarda = 'inicio'; renderTudo(); });
+        $('btnOrdemServico').addEventListener('click', () => { noPorSistema.retaguarda = 'servicos>ordem-servico'; renderSidebar(); renderConteudo(); });
+        $('btnFaturas').addEventListener('click', () => { noPorSistema.retaguarda = 'faturas'; renderSidebar(); renderConteudo(); });
+        $('btnApp').addEventListener('click', () => { noPorSistema.retaguarda = 'app'; renderSidebar(); renderConteudo(); });
+    } else {
+        $('topbar').innerHTML = `
+            <div class="topbar pdv">
+                <div class="marca-pdv"><img src="assets/logos/pdv-logo.png" alt="PDV">CAIXA ABERTO</div>
+                <div class="acoes-pdv">
+                    <span class="ac clicavel" id="btnVoltarRetaguarda"><img class="ic-img" src="assets/logos/retaguarda-icon.png" alt=""><span class="txt">Retaguarda</span></span>
+                    <span class="lux-txt">LUX SISTEMAS</span>
+                    <span class="ajuda">❓ Ajuda</span>
+                    <span class="janela-ic">▢</span>
+                    <span class="janela-ic">✕</span>
+                </div>
+            </div>`;
+        $('tabstrip').innerHTML = `
+            <div class="tabstrip">
+                <div class="tabs">
+                    <div class="tab ativa" id="tabModulo">Tutoriais</div>
+                </div>
+            </div>`;
+        $('btnVoltarRetaguarda').addEventListener('click', () => { sistemaAtivo = 'retaguarda'; renderTudo(); });
+    }
+    document.body.classList.toggle('modo-pdv', sistemaAtivo === 'pdv');
+}
+
+function renderSidebar() {
+    const menu = menuAtual();
+    const no = noAtivo();
+    $('sidebar').innerHTML = menu.map((mod) => {
+        if (!mod.submenu) {
+            return `<div class="item-menu ${no === mod.id ? 'ativo' : ''}" data-no="${mod.id}"><span class="ic">${mod.icone}</span><span class="lbl">${escapeHtml(mod.label)}</span></div>`;
+        }
+        const submenuAberto = no.startsWith(mod.id + '>');
+        const subitens = mod.submenu.map((sub) => {
+            const subno = `${mod.id}>${sub.id}`;
+            return `<div class="subitem ${subno === no ? 'ativo' : ''}" data-no="${subno}">${escapeHtml(sub.label)}</div>`;
+        }).join('');
+        return `
+            <div class="item-menu ${submenuAberto ? 'aberto' : ''}" data-modulo="${mod.id}">
+                <span class="ic">${mod.icone}</span><span class="lbl">${escapeHtml(mod.label)}</span><span class="seta">▶</span>
+            </div>
+            <div class="submenu ${submenuAberto ? 'aberto' : ''}" data-submenu-de="${mod.id}">${subitens}</div>`;
+    }).join('');
+}
+
+const EXTRAS_LABEL = { faturas: 'Faturas', app: 'App' };
+
+function labelDoNo(no) {
+    const [moduloId, subId] = no.split('>');
+    const modulo = menuAtual().find((m) => m.id === moduloId);
+    if (!modulo) return [EXTRAS_LABEL[no] || no];
+    if (!subId) return [modulo.label];
+    const sub = modulo.submenu.find((s) => s.id === subId);
+    return [modulo.label, sub ? sub.label : subId];
+}
+
+function cardVideoHtml(v) {
+    const thumb = thumbUrl(v.url);
+    return `
+        <div class="vcard">
+            ${thumb ? `<img class="vthumb" src="${thumb}" alt="">` : '<div class="vthumb"></div>'}
+            <div class="vbody">
+                <h2>${escapeHtml(v.titulo)}</h2>
+                ${v.descricao ? `<p class="vdesc">${escapeHtml(v.descricao)}</p>` : ''}
+                <a href="${escapeHtml(v.url)}" target="_blank" rel="noopener">▶ assistir</a>
+            </div>
+        </div>`;
+}
+
+function placeholderHtml(texto) {
+    return `<div class="placeholder"><div class="ic">🚧</div><p>${escapeHtml(texto)}</p></div>`;
+}
+
+async function carregarVideos() {
+    if (todosVideos) return todosVideos;
+    const res = await fetch('/api/videos');
+    if (res.status === 401) { todosVideos = 'sem-login'; return todosVideos; }
+    if (!res.ok) { todosVideos = 'erro'; return todosVideos; }
+    todosVideos = await res.json();
+    fuseIndex = new Fuse(todosVideos, {
+        keys: [
+            { name: 'titulo', weight: 3 },
+            { name: 'tags', weight: 2 },
+            { name: 'categoria_nome', weight: 1 },
+            { name: 'descricao', weight: 0.5 },
+        ],
+        threshold: 0.35,
+        ignoreLocation: true,
+        minMatchCharLength: 2,
+        shouldSort: true,
+        getFn: (obj, path) => normalizarTexto(obj[Array.isArray(path) ? path[0] : path]),
+    });
+    return todosVideos;
+}
+
+async function renderBuscaGeral(query) {
+    const videos = await carregarVideos();
+    if (videos === 'sem-login' || videos === 'erro' || !fuseIndex) return;
+    const resultados = fuseIndex.search(normalizarTexto(query)).map((r) => r.item);
+    $('conteudo').innerHTML = `
+        <div class="trilha">Busca geral</div>
+        <h1>Resultados para "${escapeHtml(query)}"</h1>
+        <p class="resultado-info">${resultados.length} vídeo${resultados.length !== 1 ? 's' : ''} encontrado${resultados.length !== 1 ? 's' : ''}</p>
+        ${resultados.length ? `<div class="grid-videos">${resultados.map(cardVideoHtml).join('')}</div>` : placeholderHtml('Nenhum vídeo encontrado para essa busca.')}
+    `;
+}
+
+async function renderDiagnostico(arquivo) {
+    $('conteudo').innerHTML = `
+        <div class="trilha">Diagnóstico por print</div>
+        <h1>Analisando a imagem…</h1>
+        <p class="resultado-info">Isso pode levar alguns segundos.</p>
+    `;
+
+    const formData = new FormData();
+    formData.append('imagem', arquivo);
+
+    let dados;
+    try {
+        const res = await fetch('/api/ocr-erro', { method: 'POST', body: formData });
+        dados = await res.json();
+    } catch {
+        dados = null;
+    }
+
+    if (!dados || dados.error) {
+        $('conteudo').innerHTML = `<div class="trilha">Diagnóstico por print</div><h1>Não consegui analisar</h1>${placeholderHtml('Tenta de novo ou usa a busca por palavra-chave.')}`;
+        return;
+    }
+
+    if (!dados.encontrado) {
+        $('conteudo').innerHTML = `
+            <div class="trilha">Diagnóstico por print</div>
+            <h1>Não reconheci esse erro</h1>
+            ${placeholderHtml('Ainda não temos esse erro mapeado. Tenta buscar por palavra-chave ou navegar pelo menu.')}
+        `;
+        return;
+    }
+
+    $('conteudo').innerHTML = `
+        <div class="trilha">Diagnóstico por print</div>
+        <h1>Encontrei um vídeo pra esse erro</h1>
+        <div class="grid-videos">${dados.videos.map(cardVideoHtml).join('')}</div>
+    `;
+}
+
+async function renderConteudo() {
+    $('buscaGeral').value = '';
+    $('limparBuscaGeral').hidden = true;
+
+    const no = noAtivo();
+    const [tituloModulo, tituloSub] = labelDoNo(no);
+    $('tabModulo').innerHTML = `${escapeHtml(tituloSub || tituloModulo)} <span class="x">✕</span>`;
+    $('conteudo').innerHTML = `<div class="trilha">${escapeHtml(tituloModulo)}${tituloSub ? ' / ' + escapeHtml(tituloSub) : ''}</div><h1>Tutoriais em vídeo</h1><div id="areaVideos">carregando…</div>`;
+
+    const categorias = videosPara(no);
+    if (!categorias) {
+        $('areaVideos').outerHTML = `<div id="areaVideos">${placeholderHtml('Os tutoriais desse módulo ainda estão sendo organizados — em breve chegam aqui.')}</div>`;
+        return;
+    }
+
+    const videos = await carregarVideos();
+    if (videos === 'sem-login') {
+        $('areaVideos').outerHTML = `<div id="areaVideos"><div class="aviso-login">Essa prévia busca os vídeos direto do LuxMenu — <a href="login.html">faça login</a> pra visualizar.</div></div>`;
+        return;
+    }
+    if (videos === 'erro') {
+        $('areaVideos').outerHTML = `<div id="areaVideos">${placeholderHtml('Não consegui carregar os vídeos agora.')}</div>`;
+        return;
+    }
+
+    const porId = Object.fromEntries(videos.map((v) => [v.id, v]));
+    const secoesHtml = CATEGORIAS_VIDEO.map(({ chave, label }) => {
+        const ids = categorias[chave];
+        if (!ids || !ids.length) return '';
+        const encontrados = ids.map((id) => porId[id]).filter(Boolean);
+        if (!encontrados.length) return '';
+        return `<div class="secao-videos">
+            <h2 class="secao-titulo">${escapeHtml(label)}</h2>
+            <div class="grid-videos">${encontrados.map(cardVideoHtml).join('')}</div>
+        </div>`;
+    }).join('');
+
+    const filtroHtml = secoesHtml ? `<input type="text" class="busca-submenu" id="buscaSubmenu" placeholder="Filtrar vídeos dessa tela...">` : '';
+    $('areaVideos').outerHTML = `<div id="areaVideos">${filtroHtml}${secoesHtml || placeholderHtml('Os tutoriais desse módulo ainda estão sendo organizados — em breve chegam aqui.')}</div>`;
+
+    const buscaSub = $('buscaSubmenu');
+    if (buscaSub) {
+        buscaSub.addEventListener('input', () => {
+            const termo = normalizarTexto(buscaSub.value.trim());
+            document.querySelectorAll('#areaVideos .secao-videos').forEach((secao) => {
+                let algumVisivel = false;
+                secao.querySelectorAll('.vcard').forEach((card) => {
+                    const titulo = normalizarTexto(card.querySelector('h2').textContent);
+                    const visivel = !termo || titulo.includes(termo);
+                    card.style.display = visivel ? '' : 'none';
+                    if (visivel) algumVisivel = true;
+                });
+                secao.style.display = algumVisivel ? '' : 'none';
+            });
+        });
+    }
+}
+
+function renderTudo() {
+    renderTopo();
+    renderSidebar();
+    renderConteudo();
+}
+
+document.body.addEventListener('click', (e) => {
+    const sub = e.target.closest('.subitem');
+    if (sub) {
+        noPorSistema[sistemaAtivo] = sub.dataset.no;
+        renderSidebar();
+        renderConteudo();
+        return;
+    }
+    const item = e.target.closest('.item-menu[data-modulo]');
+    if (item) {
+        const modId = item.dataset.modulo;
+        const atual = noAtivo();
+        noPorSistema[sistemaAtivo] = atual.startsWith(modId + '>') ? modId : `${modId}>${menuAtual().find((m) => m.id === modId).submenu[0].id}`;
+        renderSidebar();
+        renderConteudo();
+        return;
+    }
+    const simples = e.target.closest('.item-menu[data-no]');
+    if (simples) {
+        noPorSistema[sistemaAtivo] = simples.dataset.no;
+        renderSidebar();
+        renderConteudo();
+    }
+});
+
+let debounceBuscaGeral;
+$('buscaGeral').addEventListener('input', () => {
+    clearTimeout(debounceBuscaGeral);
+    const valor = $('buscaGeral').value.trim();
+    $('limparBuscaGeral').hidden = !valor;
+    debounceBuscaGeral = setTimeout(() => {
+        if (valor.length >= 2) renderBuscaGeral(valor);
+        else renderConteudo();
+    }, 150);
+});
+
+$('limparBuscaGeral').addEventListener('click', () => {
+    $('buscaGeral').value = '';
+    $('limparBuscaGeral').hidden = true;
+    renderConteudo();
+});
+
+const zonaPrint = $('printErro');
+const inputPrint = $('inputPrintErro');
+
+zonaPrint.addEventListener('click', () => inputPrint.click());
+
+zonaPrint.addEventListener('paste', (e) => {
+    const item = [...e.clipboardData.items].find((i) => i.type.startsWith('image/'));
+    if (item) renderDiagnostico(item.getAsFile());
+});
+
+zonaPrint.addEventListener('dragover', (e) => { e.preventDefault(); zonaPrint.classList.add('arrastando'); });
+zonaPrint.addEventListener('dragleave', () => zonaPrint.classList.remove('arrastando'));
+zonaPrint.addEventListener('drop', (e) => {
+    e.preventDefault();
+    zonaPrint.classList.remove('arrastando');
+    const arquivo = [...e.dataTransfer.files].find((f) => f.type.startsWith('image/'));
+    if (arquivo) renderDiagnostico(arquivo);
+});
+
+inputPrint.addEventListener('change', () => {
+    const arquivo = inputPrint.files[0];
+    if (arquivo) renderDiagnostico(arquivo);
+    inputPrint.value = '';
+});
+
+renderTudo();

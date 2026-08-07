@@ -46,11 +46,15 @@ app.use('/api/pastas',         requireAuth, require('./routes/pastas'));
 app.use('/api/arquivos',       requireAuth, require('./routes/arquivos'));
 app.use('/api/escala',         requireAuth, require('./routes/escala'));
 app.use('/api/agenda',         requireAuth, require('./routes/agenda'));
+app.use('/api/ocr-erro',       requireAuth, require('./routes/ocr-erro'));
 app.use('/api/admin/usuarios', require('./routes/admin-usuarios'));
 app.use('/api/chat',           require('./routes/chat'));
 
 // ── WebSocket chat ──
 require('./ws-chat').setup(app);
+
+// ── WebSocket fechamento ──
+require('./ws-fechamento').setup(app);
 
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`LuxMenu rodando em http://localhost:${PORT}`);
