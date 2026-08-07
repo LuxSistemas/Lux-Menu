@@ -4,6 +4,7 @@ const path = require('path');
 const multer = require('multer');
 const { createWorker } = require('tesseract.js');
 const db = require('../db');
+const { encontrarPorTexto } = require('../erros-conhecidos');
 
 const router = express.Router();
 
@@ -11,21 +12,6 @@ const CACHE_DIR = path.join(db.dataDir, 'tesseract-cache');
 if (!fs.existsSync(CACHE_DIR)) fs.mkdirSync(CACHE_DIR, { recursive: true });
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } });
-
-function normalizarTexto(str) {
-    return String(str ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-}
-
-// Cada erro conhecido tem um padrão pra bater no texto lido do print e os vídeos
-// que explicam como resolver. Começa só com o de IE — vai crescendo conforme a
-// equipe for mapeando outros erros comuns.
-const ERROS_CONHECIDOS = [
-    {
-        id: 'ie-destinatario',
-        bate: (texto) => texto.includes('ie do destinatario') && texto.includes('nao informada'),
-        videoIds: [6],
-    },
-];
 
 // Mantém o worker do Tesseract vivo entre requisições — criar um novo a cada
 // chamada pagaria de novo o custo de carregar os dados do idioma.
@@ -47,8 +33,7 @@ router.post('/', upload.single('imagem'), async (req, res) => {
         return res.status(500).json({ error: 'não consegui ler o texto da imagem' });
     }
 
-    const textoNormalizado = normalizarTexto(texto);
-    const erro = ERROS_CONHECIDOS.find((e) => e.bate(textoNormalizado));
+    const erro = encontrarPorTexto(texto);
 
     if (!erro) {
         return res.json({ encontrado: false, textoLido: texto.trim() });

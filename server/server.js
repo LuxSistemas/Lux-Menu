@@ -33,6 +33,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // ── Rotas públicas ──
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/erro-conhecido', require('./routes/erro-conhecido'));
 
 // ── Rotas protegidas ──
 app.use('/api/contabilidades', requireAuth, require('./routes/contabilidades'));
