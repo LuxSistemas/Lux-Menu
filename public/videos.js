@@ -16,6 +16,11 @@ function thumbUrl(url) {
     return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : '';
 }
 
+// Tira acento e caixa pra "devolucao" achar "Devolução", "carro" achar "Carro" etc.
+function normalizarTexto(str) {
+    return String(str ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+
 async function api(path, options) {
     const res = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...options });
     if (!res.ok) {
@@ -132,10 +137,12 @@ function construirFuse() {
         ignoreLocation: true,
         minMatchCharLength: 2,
         shouldSort: true,
+        getFn: (obj, path) => normalizarTexto(obj[Array.isArray(path) ? path[0] : path]),
     });
 }
 
 function buscarFuse(busca) {
+    busca = normalizarTexto(busca);
     let resultados = fuseIndex.search(busca).map(r => r.item);
     const palavras = busca.split(/\s+/).filter(p => p.length >= 3);
     if (resultados.length < 2 && palavras.length > 1) {
