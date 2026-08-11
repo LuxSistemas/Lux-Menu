@@ -36,7 +36,7 @@ const CATEGORIAS_VIDEO = [
 // Base antiga de vídeos foi zerada — a equipe está regravando tudo do zero.
 // Vai entrando aqui só o que já foi regravado e cadastrado de novo.
 const VIDEOS_RETAGUARDA = {
-    'pessoas>contatos': { geral: [39] },
+    'pessoas>contatos': { geral: [39], essenciais: [40] },
 };
 
 const VIDEOS_PDV = {};
