@@ -46,6 +46,12 @@ router.post('/', upload.single('imagem'), async (req, res) => {
         WHERE v.id IN (${placeholders})
     `).all(...erro.videoIds);
 
+    // O padrão de erro bateu, mas o vídeo cadastrado pra ele foi removido/ainda não
+    // foi regravado — trata como "não encontrado" em vez de devolver uma lista vazia.
+    if (!videos.length) {
+        return res.json({ encontrado: false, textoLido: texto.trim() });
+    }
+
     res.json({ encontrado: true, erroId: erro.id, videos });
 });
 

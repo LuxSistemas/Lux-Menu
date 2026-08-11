@@ -33,20 +33,13 @@ const CATEGORIAS_VIDEO = [
     { chave: 'avancado', label: 'Dicas avançadas' },
 ];
 
+// Base antiga de vídeos foi zerada — a equipe está regravando tudo do zero.
+// Vai entrando aqui só o que já foi regravado e cadastrado de novo.
 const VIDEOS_RETAGUARDA = {
-    // fiscal>nfe e servicos>ordem-servico estão com as 4 categorias completas como
-    // exemplo/maquete pra equipe — o vídeo de "erros comuns" de cada um é um vídeo
-    // real só emprestado (ainda não é sobre esse erro específico), pra mostrar como
-    // vai ficar quando o vídeo certo for gravado.
-    'fiscal>nfe': { geral: [38], essenciais: [36, 27, 25], erros: [6], avancado: [32, 31] },
-    'servicos>ordem-servico': { geral: [11], essenciais: [13, 12, 25], erros: [5], avancado: [14] },
-    'faturas': { geral: [3] },
+    'pessoas>contatos': { geral: [39] },
 };
 
-const VIDEOS_PDV = {
-    'caixa>resumo-caixa': { geral: [17] },
-    'concluir-venda': { essenciais: [29] },
-};
+const VIDEOS_PDV = {};
 
 const MENU_RETAGUARDA = [
     { id: 'inicio', label: 'Início', icone: '🏠' },
