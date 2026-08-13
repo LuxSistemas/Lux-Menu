@@ -1,5 +1,13 @@
 [
   {
+    "id": 42,
+    "titulo": "Cadastro de contador",
+    "url": "https://youtu.be/l8wdy1lAz04",
+    "tags": "contador, cadastro, pessoas, contabilidade",
+    "descricao": null,
+    "categoria_nome": "Cadastros"
+  },
+  {
     "id": 40,
     "titulo": "Cadastro de contato",
     "url": "https://youtu.be/Ry-JZvlZ-LQ",
