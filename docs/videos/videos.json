@@ -38,5 +38,13 @@
     "tags": "contatos, visão geral, cadastro, pessoas",
     "descricao": null,
     "categoria_nome": "Cadastros"
+  },
+  {
+    "id": 44,
+    "titulo": "Produtos - Visão geral",
+    "url": "https://youtu.be/80Yv5APfiC8",
+    "tags": "estoque, produtos, cadastro, visão geral",
+    "descricao": null,
+    "categoria_nome": "Cadastros"
   }
 ]
