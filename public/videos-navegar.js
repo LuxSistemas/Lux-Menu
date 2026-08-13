@@ -38,6 +38,7 @@ const CATEGORIAS_VIDEO = [
 const VIDEOS_RETAGUARDA = {
     'pessoas>contatos': { geral: [39], essenciais: [40, 41] },
     'pessoas>contador': { essenciais: [42] },
+    'pessoas>vendedores': { essenciais: [43] },
 };
 
 const VIDEOS_PDV = {};
