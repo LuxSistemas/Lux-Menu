@@ -182,12 +182,44 @@ const SISTEMAS = {
 };
 
 let sistemaAtivo = 'retaguarda';
-const noPorSistema = { retaguarda: 'fiscal>nfe', pdv: 'caixa>resumo-caixa' };
+const noPorSistema = { retaguarda: 'pessoas>contatos', pdv: 'caixa>resumo-caixa' };
 let todosVideos = null;
 let fuseIndex = null;
 
 function menuAtual() { return SISTEMAS[sistemaAtivo].menu; }
 function noAtivo() { return noPorSistema[sistemaAtivo]; }
+
+// Guarda sistema+tela atual na URL (#retaguarda:pessoas>contatos), assim um F5 ou
+// um link direto volta pra mesma tela em vez de sempre reiniciar do zero.
+function salvarEstadoNaUrl() {
+    history.replaceState(null, '', `#${sistemaAtivo}:${noAtivo()}`);
+}
+
+function restaurarEstadoDaUrl() {
+    const [sistema, no] = location.hash.slice(1).split(':');
+    if (sistema && SISTEMAS[sistema]) sistemaAtivo = sistema;
+    if (no) noPorSistema[sistemaAtivo] = no;
+}
+
+function limparBuscaGeralUI() {
+    $('buscaGeral').value = '';
+    $('limparBuscaGeral').hidden = true;
+}
+
+function navegarPara(no) {
+    noPorSistema[sistemaAtivo] = no;
+    limparBuscaGeralUI();
+    renderSidebar();
+    renderConteudo();
+    salvarEstadoNaUrl();
+}
+
+function trocarSistema(sistema) {
+    sistemaAtivo = sistema;
+    limparBuscaGeralUI();
+    renderTudo();
+    salvarEstadoNaUrl();
+}
 
 function videosPara(no) {
     return SISTEMAS[sistemaAtivo].videos[no];
@@ -216,11 +248,11 @@ function renderTopo() {
                 </div>
                 <a class="voltar" href="videos.html">← voltar pra busca por palavra-chave</a>
             </div>`;
-        $('btnEntrarPdv').addEventListener('click', () => { sistemaAtivo = 'pdv'; renderTudo(); });
-        $('tabDashboard').addEventListener('click', () => { noPorSistema.retaguarda = 'inicio'; renderTudo(); });
-        $('btnOrdemServico').addEventListener('click', () => { noPorSistema.retaguarda = 'servicos>ordem-servico'; renderSidebar(); renderConteudo(); });
-        $('btnFaturas').addEventListener('click', () => { noPorSistema.retaguarda = 'faturas'; renderSidebar(); renderConteudo(); });
-        $('btnApp').addEventListener('click', () => { noPorSistema.retaguarda = 'app'; renderSidebar(); renderConteudo(); });
+        $('btnEntrarPdv').addEventListener('click', () => trocarSistema('pdv'));
+        $('tabDashboard').addEventListener('click', () => navegarPara('inicio'));
+        $('btnOrdemServico').addEventListener('click', () => navegarPara('servicos>ordem-servico'));
+        $('btnFaturas').addEventListener('click', () => navegarPara('faturas'));
+        $('btnApp').addEventListener('click', () => navegarPara('app'));
     } else {
         $('topbar').innerHTML = `
             <div class="topbar pdv">
@@ -239,7 +271,7 @@ function renderTopo() {
                     <div class="tab ativa" id="tabModulo">Tutoriais</div>
                 </div>
             </div>`;
-        $('btnVoltarRetaguarda').addEventListener('click', () => { sistemaAtivo = 'retaguarda'; renderTudo(); });
+        $('btnVoltarRetaguarda').addEventListener('click', () => trocarSistema('retaguarda'));
     }
     document.body.classList.toggle('modo-pdv', sistemaAtivo === 'pdv');
 }
@@ -366,9 +398,6 @@ async function renderDiagnostico(arquivo) {
 }
 
 async function renderConteudo() {
-    $('buscaGeral').value = '';
-    $('limparBuscaGeral').hidden = true;
-
     const no = noAtivo();
     const [tituloModulo, tituloSub] = labelDoNo(no);
     $('tabModulo').innerHTML = `${escapeHtml(tituloSub || tituloModulo)} <span class="x">✕</span>`;
@@ -432,25 +461,19 @@ function renderTudo() {
 document.body.addEventListener('click', (e) => {
     const sub = e.target.closest('.subitem');
     if (sub) {
-        noPorSistema[sistemaAtivo] = sub.dataset.no;
-        renderSidebar();
-        renderConteudo();
+        navegarPara(sub.dataset.no);
         return;
     }
     const item = e.target.closest('.item-menu[data-modulo]');
     if (item) {
         const modId = item.dataset.modulo;
         const atual = noAtivo();
-        noPorSistema[sistemaAtivo] = atual.startsWith(modId + '>') ? modId : `${modId}>${menuAtual().find((m) => m.id === modId).submenu[0].id}`;
-        renderSidebar();
-        renderConteudo();
+        navegarPara(atual.startsWith(modId + '>') ? modId : `${modId}>${menuAtual().find((m) => m.id === modId).submenu[0].id}`);
         return;
     }
     const simples = e.target.closest('.item-menu[data-no]');
     if (simples) {
-        noPorSistema[sistemaAtivo] = simples.dataset.no;
-        renderSidebar();
-        renderConteudo();
+        navegarPara(simples.dataset.no);
     }
 });
 
@@ -496,4 +519,6 @@ inputPrint.addEventListener('change', () => {
     inputPrint.value = '';
 });
 
+restaurarEstadoDaUrl();
 renderTudo();
+salvarEstadoNaUrl();
