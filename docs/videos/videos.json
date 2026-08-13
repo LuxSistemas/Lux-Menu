@@ -24,6 +24,14 @@
     "categoria_nome": "Cadastros"
   },
   {
+    "id": 45,
+    "titulo": "Cadastro de produto",
+    "url": "https://youtu.be/cbpfFcyaCRQ",
+    "tags": "estoque, produtos, cadastro",
+    "descricao": null,
+    "categoria_nome": "Cadastros"
+  },
+  {
     "id": 43,
     "titulo": "Cadastro de vendedor",
     "url": "https://youtu.be/NCotmyXJoV4",
