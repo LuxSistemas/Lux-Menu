@@ -234,7 +234,7 @@ function renderQuadro() {
             <button type="button" class="btn-add-tarefa" data-pessoa="${col.id || ''}">+ Adicionar tarefa</button>
             <form class="add-tarefa-rapida" data-pessoa="${col.id || ''}" hidden>
                 <input type="text" class="add-tarefa-input" placeholder="título da tarefa">
-                <input type="text" class="add-tarefa-desc" placeholder="detalhes (opcional)">
+                <textarea class="add-tarefa-desc" placeholder="detalhes (opcional) — Shift+Enter pra pular linha" rows="1"></textarea>
                 <div class="linha-data-hora">
                     <input type="date" class="add-tarefa-data" title="data (opcional)">
                     <input type="time" class="add-tarefa-hora" title="horário (opcional)">
@@ -318,21 +318,23 @@ function renderQuadro() {
         btn.addEventListener('click', () => {
             const form = btn.closest('.add-tarefa-rapida');
             form.reset();
+            form.querySelector('.add-tarefa-desc').style.height = 'auto';
             form.hidden = true;
             form.previousElementSibling.hidden = false;
         });
     });
 
-    // Recolhe o formulário sozinho se o usuário clicar fora dele sem enviar nem cancelar.
-    $('tarefasBoard').querySelectorAll('.add-tarefa-rapida').forEach((form) => {
-        form.addEventListener('focusout', (e) => {
-            if (form.contains(e.relatedTarget)) return;
-            setTimeout(() => {
-                if (form.hidden || form.contains(document.activeElement)) return;
-                form.reset();
-                form.hidden = true;
-                form.previousElementSibling.hidden = false;
-            }, 150);
+    // Shift+Enter pula linha nos detalhes; Enter sozinho envia o formulário (igual chat).
+    $('tarefasBoard').querySelectorAll('.add-tarefa-desc').forEach((textarea) => {
+        textarea.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                textarea.closest('form').requestSubmit();
+            }
+        });
+        textarea.addEventListener('input', () => {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 100) + 'px';
         });
     });
 
@@ -367,6 +369,7 @@ function renderQuadro() {
                 });
                 input.value = '';
                 descInput.value = '';
+                descInput.style.height = 'auto';
                 dataInput.value = '';
                 horaInput.value = '';
                 urgenciaInput.value = '';
