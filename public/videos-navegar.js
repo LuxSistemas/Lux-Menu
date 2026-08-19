@@ -42,6 +42,7 @@ const VIDEOS_RETAGUARDA = {
     'estoque>produtos': { geral: [44], essenciais: [45], avancado: [46] },
     'estoque>grupo': { essenciais: [47] },
     'estoque>unidades': { essenciais: [48] },
+    'estoque>marcas': { essenciais: [49] },
 };
 
 const VIDEOS_PDV = {};
