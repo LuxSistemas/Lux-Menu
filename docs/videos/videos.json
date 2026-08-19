@@ -1,5 +1,21 @@
 [
   {
+    "id": 51,
+    "titulo": "Ajuste de estoque dos produtos",
+    "url": "https://youtu.be/qJDpTsnpgfw",
+    "tags": "estoque, produtos, ajuste",
+    "descricao": null,
+    "categoria_nome": "Cadastros"
+  },
+  {
+    "id": 52,
+    "titulo": "Ajuste de estoque em lote dos produtos",
+    "url": "https://youtu.be/17oi9FC3fxE",
+    "tags": "estoque, produtos, ajuste, lote",
+    "descricao": null,
+    "categoria_nome": "Cadastros"
+  },
+  {
     "id": 46,
     "titulo": "Ajuste de imposto e ajuste de combustível no produto",
     "url": "https://youtu.be/MEIAxur6aW8",
@@ -76,6 +92,22 @@
     "titulo": "Contatos - Visão geral",
     "url": "https://youtu.be/x6FqyzXFXgw",
     "tags": "contatos, visão geral, cadastro, pessoas",
+    "descricao": null,
+    "categoria_nome": "Cadastros"
+  },
+  {
+    "id": 50,
+    "titulo": "Etiqueta dos produtos",
+    "url": "https://youtu.be/bz9_GbvDjqM",
+    "tags": "estoque, produtos, etiqueta, impressão",
+    "descricao": null,
+    "categoria_nome": "Cadastros"
+  },
+  {
+    "id": 53,
+    "titulo": "Inventário de mês dos produtos",
+    "url": "https://youtu.be/fTML4znfWDM",
+    "tags": "estoque, produtos, inventário, mensal",
     "descricao": null,
     "categoria_nome": "Cadastros"
   },

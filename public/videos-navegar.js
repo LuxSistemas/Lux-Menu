@@ -43,6 +43,10 @@ const VIDEOS_RETAGUARDA = {
     'estoque>grupo': { essenciais: [47] },
     'estoque>unidades': { essenciais: [48] },
     'estoque>marcas': { essenciais: [49] },
+    'estoque>imp-etiqueta': { essenciais: [50] },
+    'estoque>ajuste-estoque': { essenciais: [51] },
+    'estoque>ajuste-estoque-lote': { essenciais: [52] },
+    'estoque>inventario-mensal': { essenciais: [53] },
 };
 
 const VIDEOS_PDV = {};
