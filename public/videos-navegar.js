@@ -40,6 +40,7 @@ const VIDEOS_RETAGUARDA = {
     'pessoas>contador': { essenciais: [42] },
     'pessoas>vendedores': { essenciais: [43] },
     'estoque>produtos': { geral: [44], essenciais: [45], avancado: [46] },
+    'estoque>grupo': { essenciais: [47] },
 };
 
 const VIDEOS_PDV = {};
