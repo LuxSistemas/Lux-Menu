@@ -47,6 +47,7 @@ const VIDEOS_RETAGUARDA = {
     'estoque>ajuste-estoque': { essenciais: [51] },
     'estoque>ajuste-estoque-lote': { essenciais: [52] },
     'estoque>inventario-mensal': { essenciais: [53] },
+    'compras>lista-compras': { geral: [54], essenciais: [55, 56] },
 };
 
 const VIDEOS_PDV = {};
@@ -78,7 +79,6 @@ const MENU_RETAGUARDA = [
     {
         id: 'compras', label: 'Compras', icone: '🛒',
         submenu: [
-            { id: 'pedido-compra', label: 'Pedido de Compra' },
             { id: 'lista-compras', label: 'Lista Compras' },
             { id: 'consulta-notas-fornecedor', label: 'Consulta Notas de Fornecedor' },
             { id: 'devolucao-compra', label: 'Devolução de Compra' },
