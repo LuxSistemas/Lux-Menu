@@ -85,12 +85,12 @@ function renderEscala() {
         let acoes = '';
         if (!passada) {
             if (s.folga) {
-                acoes = `<button class="btn-despular" data-data="${s.data}">Retomar</button>`;
+                acoes = `<button class="btn-despular" data-data="${s.data}">Reverter</button>`;
             } else {
                 acoes = `
                     <button class="btn-reatribuir" data-data="${s.data}">Reatribuir</button>
                     <button class="btn-trocar" data-data="${s.data}">Trocar</button>
-                    <button class="btn-pular" data-data="${s.data}">Pular</button>`;
+                    <button class="btn-pular" data-data="${s.data}">Sábado sem trabalho</button>`;
             }
         }
 
