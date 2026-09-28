@@ -35,7 +35,7 @@ function redistribuirFuturos() {
     const porId = new Map(pessoas.map(p => [p.id, p]));
     const hoje = hojeISO();
 
-    const ultimaPassada = db.prepare('SELECT * FROM escala_sabados WHERE data < ? ORDER BY data DESC LIMIT 1').get(hoje);
+    const ultimaPassada = db.prepare('SELECT * FROM escala_sabados WHERE data < ? AND folga = 0 ORDER BY data DESC LIMIT 1').get(hoje);
     let ponteiro = ultimaPassada ? porId.get(ultimaPassada.pessoa_id).ordem : (pessoas[0] ? pessoas[0].ordem - 1 : 0);
 
     const futuras = db.prepare('SELECT * FROM escala_sabados WHERE data >= ? ORDER BY data ASC').all(hoje);
@@ -44,7 +44,11 @@ function redistribuirFuturos() {
     for (const linha of futuras) {
         if (linha.folga) continue; // sábado pulado: não consome a vez na rotação
         if (linha.manual) {
-            ponteiro = porId.get(linha.pessoa_id).ordem;
+            // O ajuste manual vale só para essa data — a vez é consumida normalmente,
+            // não pula pra ordem de quem foi colocado ali (senão o ponteiro pode andar
+            // pra trás e repetir/pular gente quando a pessoa manual tem ordem menor).
+            const prox = proximoAtivo(pessoas, ponteiro);
+            if (prox) ponteiro = prox.ordem;
             continue;
         }
         const prox = proximoAtivo(pessoas, ponteiro);
@@ -155,6 +159,7 @@ router.post('/sabados/trocar', (req, res) => {
     const hoje = hojeISO();
     if (linhaA.data < hoje || linhaB.data < hoje) return res.status(400).json({ error: 'só é possível trocar sábados futuros' });
     if (linhaA.folga || linhaB.folga) return res.status(400).json({ error: 'não é possível trocar sábados marcados como folga' });
+    if (linhaA.pessoa_id === linhaB.pessoa_id) return res.status(400).json({ error: 'as duas datas já são da mesma pessoa' });
 
     db.prepare('UPDATE escala_sabados SET pessoa_id = ?, manual = 1 WHERE id = ?').run(linhaB.pessoa_id, linhaA.id);
     db.prepare('UPDATE escala_sabados SET pessoa_id = ?, manual = 1 WHERE id = ?').run(linhaA.pessoa_id, linhaB.id);
@@ -179,10 +184,15 @@ router.post('/sabados/pular', (req, res) => {
     if (!linha) return res.status(404).json({ error: 'sábado não encontrado' });
     if (linha.folga) return res.status(400).json({ error: 'sábado já marcado como sem expediente' });
 
-    db.prepare('UPDATE escala_sabados SET folga = 1, manual = 1 WHERE id = ?').run(linha.id);
+    // Não mexe em "manual": se o sábado já tinha um ajuste manual antes de virar folga,
+    // ele precisa continuar lá quando o "Reverter" desfizer a folga (ver despular abaixo).
+    // O laço de redistribuirFuturos já ignora folga=1 antes mesmo de olhar manual, então
+    // não precisa marcar manual=1 aqui pra proteger a linha.
+    db.prepare('UPDATE escala_sabados SET folga = 1 WHERE id = ?').run(linha.id);
 
-    // Adiciona +1 sábado no horizonte para compensar a folga
-    const total = db.prepare('SELECT COUNT(*) AS c FROM escala_sabados WHERE data >= ?').get(hoje).c;
+    // Adiciona +1 sábado no horizonte para compensar a folga (conta só os plantões de
+    // verdade, senão a folga em si já infla essa contagem e sobra sábado extra fora da tela)
+    const total = db.prepare('SELECT COUNT(*) AS c FROM escala_sabados WHERE data >= ? AND folga = 0').get(hoje).c;
     garantirHorizonte(total + 1);
     redistribuirFuturos();
 
@@ -200,7 +210,7 @@ router.post('/sabados/despular', (req, res) => {
     if (!linha) return res.status(404).json({ error: 'sábado não encontrado' });
     if (!linha.folga) return res.status(400).json({ error: 'sábado não está marcado como folga' });
 
-    db.prepare('UPDATE escala_sabados SET folga = 0, manual = 0 WHERE id = ?').run(linha.id);
+    db.prepare('UPDATE escala_sabados SET folga = 0 WHERE id = ?').run(linha.id);
     redistribuirFuturos();
 
     res.json({ ok: true });
