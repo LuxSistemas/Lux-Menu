@@ -204,7 +204,7 @@ function renderGrid() {
 // (algo que o Google Agenda não faz — junta os dois tipos na mesma lista da pessoa).
 function renderQuadro() {
     const hoje = hojeISO();
-    const pessoasOrdenadas = pessoas.filter((p) => p.ativo).sort((a, b) => a.ordem_agenda - b.ordem_agenda);
+    const pessoasOrdenadas = pessoas.filter((p) => p.ativo_agenda).sort((a, b) => a.ordem_agenda - b.ordem_agenda);
     const colunas = [{ id: null, nome: 'Geral' }, ...pessoasOrdenadas.map((p) => ({ id: p.id, nome: p.nome }))];
 
     $('tarefasBoard').innerHTML = colunas.map((col) => {
@@ -382,7 +382,7 @@ function renderQuadro() {
 function linhaTarefaHtml(t) {
     const opcoesPessoas = [
         `<button type="button" class="tarefa-mover-opcao" data-id="${t.id}" data-pessoa="">Geral</button>`,
-        ...pessoas.filter((p) => p.ativo || p.id === t.pessoa_id)
+        ...pessoas.filter((p) => p.ativo_agenda || p.id === t.pessoa_id)
             .map((p) => `<button type="button" class="tarefa-mover-opcao" data-id="${t.id}" data-pessoa="${p.id}">${escapeHtml(p.nome)}</button>`),
     ].join('');
     const temMeta = t.data || t.urgencia;
@@ -438,7 +438,7 @@ async function carregarTarefas() {
 
 async function carregarPessoas() {
     pessoas = await api('/api/escala/pessoas');
-    const opcoes = pessoas.filter((p) => p.ativo).map((p) => `<option value="${p.id}">${escapeHtml(p.nome)}</option>`).join('');
+    const opcoes = pessoas.filter((p) => p.ativo_agenda).map((p) => `<option value="${p.id}">${escapeHtml(p.nome)}</option>`).join('');
     $('compPessoa').innerHTML = '<option value="">Sem responsável</option>' + opcoes;
     $('tarefaEditPessoa').innerHTML = '<option value="">Geral</option>' + opcoes;
 }
