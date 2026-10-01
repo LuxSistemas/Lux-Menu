@@ -259,8 +259,18 @@ function renderQuadro() {
 
     $('tarefasBoard').querySelectorAll('.tarefa-check').forEach((chk) => {
         chk.addEventListener('change', async () => {
-            await api(`/api/agenda/tarefas/${chk.dataset.id}`, { method: 'PUT', body: JSON.stringify({ feito: chk.checked }) });
-            await carregarTarefas();
+            // Feedback imediato (risco no texto) antes do recarregamento — senão a tarefa
+            // só some da lista principal pro "Concluídas" recolhido, sem nenhuma confirmação visível.
+            const linha = chk.closest('.tarefa-linha');
+            linha.classList.toggle('feita', chk.checked);
+            try {
+                await api(`/api/agenda/tarefas/${chk.dataset.id}`, { method: 'PUT', body: JSON.stringify({ feito: chk.checked }) });
+                await carregarTarefas();
+            } catch (err) {
+                linha.classList.toggle('feita', !chk.checked);
+                chk.checked = !chk.checked;
+                alert(err.message);
+            }
         });
     });
 
