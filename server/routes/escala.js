@@ -30,13 +30,34 @@ function proximoAtivo(pessoas, depoisDeOrdem) {
     return null;
 }
 
+// Reconstrói em que posição do rodízio o ponteiro estaria logo ANTES de `dataLimite`,
+// replay a partir da última linha automática (não-manual, não-folga) — nunca de uma
+// linha manual, mesmo que ela já tenha virado passado. Uma linha manual não diz nada
+// sobre a posição real da fila (foi escolhida à mão), então ancorar nela faria o
+// ponteiro herdar a ordem de quem foi colocado ali, igual ao bug que já corrigimos
+// dentro do laço — só que essa é a mesma falha, na busca da âncora em si.
+function ponteiroAntesDe(pessoas, porId, dataLimite) {
+    const ancora = db.prepare('SELECT * FROM escala_sabados WHERE data < ? AND folga = 0 AND manual = 0 ORDER BY data DESC LIMIT 1').get(dataLimite);
+    let ponteiro = ancora ? porId.get(ancora.pessoa_id).ordem : (pessoas[0] ? pessoas[0].ordem - 1 : 0);
+
+    const linhasEntreAncoraEDataLimite = ancora
+        ? db.prepare('SELECT * FROM escala_sabados WHERE data > ? AND data < ? ORDER BY data ASC').all(ancora.data, dataLimite)
+        : db.prepare('SELECT * FROM escala_sabados WHERE data < ? ORDER BY data ASC').all(dataLimite);
+
+    for (const linha of linhasEntreAncoraEDataLimite) {
+        if (linha.folga) continue;
+        const prox = proximoAtivo(pessoas, ponteiro);
+        if (prox) ponteiro = prox.ordem;
+    }
+    return ponteiro;
+}
+
 function redistribuirFuturos() {
     const pessoas = listaPessoas();
     const porId = new Map(pessoas.map(p => [p.id, p]));
     const hoje = hojeISO();
 
-    const ultimaPassada = db.prepare('SELECT * FROM escala_sabados WHERE data < ? AND folga = 0 ORDER BY data DESC LIMIT 1').get(hoje);
-    let ponteiro = ultimaPassada ? porId.get(ultimaPassada.pessoa_id).ordem : (pessoas[0] ? pessoas[0].ordem - 1 : 0);
+    let ponteiro = ponteiroAntesDe(pessoas, porId, hoje);
 
     const futuras = db.prepare('SELECT * FROM escala_sabados WHERE data >= ? ORDER BY data ASC').all(hoje);
     const atualizar = db.prepare('UPDATE escala_sabados SET pessoa_id = ? WHERE id = ?');
@@ -70,9 +91,11 @@ function garantirHorizonte(minimo) {
     const porId = new Map(pessoas.map(p => [p.id, p]));
     let cursor = new Date(`${ultima.data}T00:00:00`);
 
-    // Encontra o ponteiro real olhando o último não-folga da lista
-    const ultimaNaoFolga = db.prepare('SELECT * FROM escala_sabados WHERE folga = 0 ORDER BY data DESC LIMIT 1').get();
-    let ponteiro = ultimaNaoFolga ? porId.get(ultimaNaoFolga.pessoa_id).ordem : (pessoas[0] ? pessoas[0].ordem - 1 : 0);
+    // Ponteiro logo depois da última linha da tabela (inclusive) — mesmo replay de
+    // ponteiroAntesDe, só que até o dia seguinte à última data, pra já contar essa
+    // última linha (que pode ser manual) no cálculo sem herdar a ordem dela direto.
+    const diaSeguinteAUltima = paraISO(new Date(new Date(`${ultima.data}T00:00:00`).getTime() + 86400000));
+    let ponteiro = ponteiroAntesDe(pessoas, porId, diaSeguinteAUltima);
 
     const inserir = db.prepare('INSERT INTO escala_sabados (data, pessoa_id, manual, folga, criado_em) VALUES (?, ?, 0, 0, ?)');
     const faltam = minimo - totalFuturas;
